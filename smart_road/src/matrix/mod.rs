@@ -44,8 +44,7 @@ fn draw_matrix_in_canva(canvas: &mut Canvas<Window>, matrix: &mut Matrix, cell_s
 
 
 pub fn matrix_and_canva<'a>(canvas: &mut Canvas<Window>, heigth: u32, width: u32){
-    // Example matrix to draw
-    // Example matrix to draw
+
     let texture_creator = canvas.texture_creator();
     let road_texture: Texture<'_> = Texture::new(&texture_creator, &Textures::Road);
     let herbe_texture: Texture<'_> = Texture::new(&texture_creator, &Textures::Herbe);

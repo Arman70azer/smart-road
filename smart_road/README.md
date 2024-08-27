@@ -162,3 +162,13 @@ This project will help you learn about:
 * Armand (captain)
 * Jean-frederic
 * Kevin
+
+-------------------------
+
+> Usage
+
+# Construire l'image Docker en nommant l'image 'smart-road-app'
+docker build -t smart-road-app .
+
+# Exécuter le conteneur en mappant le port 8080 de l'hôte au port 8080 du conteneur
+docker run -p 8080:8080 smart-road-app

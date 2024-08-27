@@ -159,6 +159,6 @@ This project will help you learn about:
 
 > Athors : 
 
-* Armand
+* Armand (captain)
 * Jean-frederic
 * Kevin

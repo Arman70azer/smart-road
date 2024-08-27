@@ -2,9 +2,9 @@ use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 
-pub fn sprite_map(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, texture_creator: &sdl2::render::TextureCreator<sdl2::video::WindowContext>, heigth: u32, width: u32) {
+pub fn applicate_texture(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, texture_creator: &sdl2::render::TextureCreator<sdl2::video::WindowContext>, filename: String, heigth: u32, width: u32) {
     // Load a texture from an image file
-    let texture = texture_creator.load_texture("src/images/routes.png").unwrap();
+    let texture = texture_creator.load_texture(filename).unwrap();
 
     // Define the destination rectangle (where on the canvas to draw the texture)
     let dest_rect = Rect::new(0, 0, width, heigth); // Example position and size

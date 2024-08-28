@@ -6,8 +6,8 @@ use sdl2::image::LoadTexture;
 #[derive(Copy, Clone)]
 pub enum Textures {
     Herbe,
-    Road,
-    Nothing,
+    RoadRow,
+    RoadCol,
 }
 
 pub struct Texture<'a> {
@@ -18,8 +18,8 @@ impl<'a> Texture<'a> {
     pub fn new(texture_creator: &'a TextureCreator<WindowContext>, texture_type: &Textures) -> Self {
         let filename = match texture_type {
             Textures::Herbe => "./src/images/herbes.png",
-            Textures::Road => "./src/images/road_east_west.png",
-            Textures::Nothing => "./src/images/road_north_south.png",
+            Textures::RoadRow => "./src/images/road_east_west.png",
+            Textures::RoadCol => "./src/images/road_north_south.png",
         };
 
         let texture = texture_creator.load_texture(filename).unwrap();

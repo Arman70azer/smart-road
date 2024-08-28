@@ -56,15 +56,24 @@ pub fn matrix_and_canva<'a>(
     let cell_size: u32 = cell_size_width.min(cell_size_height);
 
     let texture_creator = canvas.texture_creator();
-    let road_texture = Texture::new(&texture_creator, &Textures::Road);
+    let road_row_texture = Texture::new(&texture_creator, &Textures::RoadRow);
+    let road_col_texture = Texture::new(&texture_creator, &Textures::RoadCol);
     let herbe_texture = Texture::new(&texture_creator, &Textures::Herbe);
 
     // Initialize the matrix with `Cell`s
     let mut matrix: Matrix = vec![vec![]; num_of_rows as usize];
     for row in 0..num_of_rows {
         for col in 0..num_of_cols {
-            let texture = if (row + col) % 2 == 0 { &herbe_texture } else { &road_texture };
+            let texture = 
+            if row >= 8 && row <= 13 && col < 8 || row >= 8 && row <= 13 && col > 13 { 
+                &road_row_texture
+            } else if col >= 8 && col <= 13 && row < 8 || col >= 8 && col <= 13 && row > 13  {
+                &road_col_texture
+            } else { 
+                &herbe_texture
+            };
             matrix[row as usize].push(Cell::new(texture));
+            println!("{} {}", row, col);
         }
     }
 

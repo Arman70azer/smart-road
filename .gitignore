@@ -1,0 +1,38 @@
+# Cargo's bin directory
+/target/
+
+# Dependencies directory
+/Cargo.lock
+
+# Build directory
+/build/
+
+# Ignore temporary files
+*.swp
+*.swo
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore Rust's debug information
+*.rs.bk
+
+# Ignore compiled artifacts and caches
+*.o
+*.d
+*.so
+*.dylib
+*.dll
+*.lib
+*.a
+
+# Ignore environment files
+.env
+
+# Ignore Rust test directory
+/tests/

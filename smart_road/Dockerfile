@@ -4,7 +4,7 @@ FROM rust:latest as builder
 # Créer un répertoire de travail
 WORKDIR /usr/src/myapp
 
-# Copier les fichiers Cargo.toml et Cargo.lock (si présent) pour la construction des dépendances
+# Copier les fichiers Cargo.toml et Cargo.lock (si présents) pour la construction des dépendances
 COPY Cargo.toml Cargo.lock ./
 
 # Créer un fichier pour les dépendances
@@ -20,10 +20,10 @@ COPY . .
 RUN cargo build --release
 
 # Étape 2 : Création de l'image finale
-FROM debian:latest
+FROM alpine:latest
 
 # Installer les bibliothèques nécessaires
-RUN apt-get update && apt-get install -y libssl-dev && apt-get clean
+RUN apk add --no-cache libssl1.1
 
 # Créer un répertoire de travail
 WORKDIR /usr/local/bin

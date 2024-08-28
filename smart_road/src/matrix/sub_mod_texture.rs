@@ -25,10 +25,10 @@ impl<'a> Texture<'a> {
             Textures::RoadRow => "./src/images/road_east_west.png",
             Textures::RoadCol => "./src/images/road_north_south.png",
             Textures::RoadCent => "./src/images/center.png",
-            Textures::BlackCar => "./src/images/black_car.png",
-            Textures::OrangeCar => "./src/images/orange_car.png",
-            Textures::BlueCar => "./src/images/blue_car.png",
-            Textures::GreenCar => "./src/images/green_car.png",
+            Textures::BlackCar => "./src/images/car_black.png",
+            Textures::OrangeCar => "./src/images/car_red.png",
+            Textures::BlueCar => "./src/images/car_blue.png",
+            Textures::GreenCar => "./src/images/car_green.png",
 
         };
 

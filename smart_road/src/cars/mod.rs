@@ -37,7 +37,7 @@ impl<'a> Car<'a> {
             Destinations::North => Textures::BlueCar,
             Destinations::South => Textures::GreenCar,
         };
-        
+
         let texture = Texture::new(texture_creator, &texture_type);
 
         // let path = match destination {
@@ -46,7 +46,7 @@ impl<'a> Car<'a> {
         //     Destinations::East => east_destinations(positions),
         //     Destinations::West => west_destinations(positions),
         // };
-        Car{row, column, texture, path: vec![(row, column)], position, speed:1 }
+        Car{row, column, texture, path: vec![(row, column)]/*juste pour le momment */, position, speed:1 }
     }
 }
 

@@ -21,6 +21,7 @@ pub struct Car<'a> {
     pub speed: u32,
     pub size: u32,
     pub choc: i16,
+    //Penser à mettre un temps, 
 }
 
 impl<'a> fmt::Debug for Car<'a> {
@@ -60,6 +61,9 @@ impl<'a> Car<'a> {
 
         let texture = Texture::new(texture_creator, &texture_type);
 
+        //ICI il faut créer les fn destinations pour qu'il renvoie un Vec avec à l'intérieur les positions de
+        //toutes les cases sur lesquelles la voiture devra ce rendre pour arriver à destination.
+
         // let path = match destination {
         //     Destinations::South => south_destinations(positions),
         //     Destinations::North => north_destinations(positions),
@@ -67,10 +71,12 @@ impl<'a> Car<'a> {
         //     Destinations::West => west_destinations(positions),
         // };
         let sizy = (size as f64 * 0.9) as u32;
-        Car{row, column, texture, path: vec![(row, column)]/*juste pour le momment */, position, level_speed:1, speed, size: sizy, choc: 0 }
+        Car{row, column, texture, path: vec![(row, column)]/*remplacer avec juste path */, position, level_speed:1, speed, size: sizy, choc: 0 }
     }
 
     
+    //Ici Il faut de préfèrence finir d'apporter le path à la voiture avant de commencer
+    //la voiture devra ce déplacer à l'étape suivante en utilsant comme réfèrence la car.position et en cherchant l'étape suivante dans car.path
     pub fn update_position(&mut self) {
         self.row += (self.speed as i32) * self.level_speed;
         self.position = (self.row, self.column);

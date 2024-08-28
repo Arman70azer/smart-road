@@ -1,12 +1,14 @@
 extern crate sdl2;
-use smart_road::matrix::matrix_and_canva; // Import the draw_matrix function
+use std::time::Duration;
+use smart_road::matrix::{matrix_and_canva, ROW, COLUMN}; // Import the draw_matrix function
 use smart_road::cars::{Car, Destinations};
 use sdl2::image::InitFlag;
 use sdl2::pixels::Color;
 // use crate::sdl2::image::LoadTexture;
 
-const WIDTH: u32 = 800; // Example width
-const HEIGHT: u32 = 800; // Example height
+const WIDTH: i32 = 800; // Example width
+const HEIGHT: i32 = 800; // Example height
+const SQUARE_SPEED: i32= 1;
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -16,36 +18,78 @@ fn main() {
     sdl2::image::init(InitFlag::PNG | InitFlag::JPG | InitFlag::WEBP).unwrap();
 
     let window = video_subsystem
-        .window("SDL2 Window", WIDTH, HEIGHT)
+        .window("SDL2 Window", WIDTH as u32, HEIGHT as u32)
         .position_centered()
         .build()
         .unwrap();
 
     let mut canvas = window.into_canvas().build().unwrap();
-    // let texture_creator = canvas.texture_creator();
-
-    // let background_texture = texture_creator.load_texture("./src/images/roads.png").unwrap();
 
 
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
+    let texture_creator = canvas.texture_creator();
 
-    
-    
-    //Permet d'implementer la matrix dans le canva
-    // canvas.copy(&background_texture, None, None).unwrap();
     matrix_and_canva(&mut canvas ,HEIGHT, WIDTH );
     
     canvas.present();
 
+    let cell_size_width = WIDTH / COLUMN;
+    let cell_size_height = HEIGHT / ROW;
+    let cell_size = cell_size_width.min(cell_size_height);
+
     // Main loop placeholder
     let mut event_pump = sdl_context.event_pump().unwrap();
-    'running: loop {
-        for event in event_pump.poll_iter() {
-            match event {
-                sdl2::event::Event::Quit { .. } => break 'running,
-                _ => {}
-            }
-        }
-    }
+     // Créer un vecteur pour stocker les voitures
+     let mut cars: Vec<Car> = Vec::new();
+
+     'running: loop {
+         // Gestion des événements
+         for event in event_pump.poll_iter() {
+             match event {
+                 sdl2::event::Event::Quit { .. } => break 'running,
+                 sdl2::event::Event::KeyDown { keycode, .. } => {
+                     if let Some(sdl2::keyboard::Keycode::Left) = keycode {
+                        let new_car = Car::new(Destinations::North, Destinations::South , &texture_creator,
+                             SQUARE_SPEED as u32,
+                             cell_size as u32,
+                         );
+                         cars.push(new_car);
+                        if let Some(first_car) = cars.iter().nth(0) {
+                            println!("{:?}", first_car);
+                        } else {
+                            println!("No cars in the list.");
+                        }
+                     }
+                 }
+                 _ => {}
+             }
+         }
+ 
+         // Mettre à jour la position de chaque voitures
+         for car in &mut cars{
+             car.update_position();
+         }
+
+         cars.retain(|car| car.column <= COLUMN && car.row <= HEIGHT);
+ 
+         // Effacer le canevas
+         canvas.set_draw_color(Color::RGB(0, 0, 0));
+         canvas.clear();
+
+         matrix_and_canva(&mut canvas ,HEIGHT, WIDTH );
+
+ 
+         // Dessiner chaque voitures
+         canvas.set_draw_color(Color::RGB(255, 0, 0));
+         for car in &cars {
+             car.draw(&mut canvas);
+         }
+ 
+         // Mettre à jour le canevas
+         canvas.present();
+ 
+         // Limiter la boucle à environ 60 FPS
+         std::thread::sleep(Duration::from_millis(16));
+     }
 }

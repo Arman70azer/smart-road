@@ -1,6 +1,7 @@
 use crate::matrix::{sub_mod_texture::{Texture, Textures}, ROW, COLUMN};
-use sdl2::video::WindowContext;
-use sdl2::render::TextureCreator;
+use sdl2::video::{Window, WindowContext};
+use sdl2::render::{TextureCreator, Canvas};
+use std::fmt;
 
 #[derive(PartialEq)]
 pub enum Destinations {
@@ -11,16 +12,32 @@ pub enum Destinations {
 }
 
 pub struct Car<'a> {
-    pub row: u32,
-    pub column: u32,
+    pub row: i32,
+    pub column: i32,
     pub texture: Texture<'a>,
-    pub path: Vec<(u32, u32)>,
-    pub position: (u32, u32),
-    pub speed: u8,
+    pub path: Vec<(i32, i32)>,
+    pub position: (i32, i32),
+    pub level_speed: i32,
+    pub speed: u32,
+    pub size: u32
+}
+
+impl<'a> fmt::Debug for Car<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Car")
+            .field("row", &self.row)
+            .field("column", &self.column)
+            .field("path", &self.path)
+            .field("position", &self.position)
+            .field("level_speed", &self.level_speed)
+            .field("speed", &self.speed)
+            .field("size", &self.size)
+            .finish()
+    }
 }
 
 impl<'a> Car<'a> {
-    pub fn new(spawn:Destinations, destination: Destinations, texture_creator: &'a TextureCreator<WindowContext>)->Self{
+    pub fn new(spawn:Destinations, destination: Destinations, texture_creator: &'a TextureCreator<WindowContext>, speed : u32, size: u32)->Self{
 
         let position = match spawn {
             Destinations::North => north_spawn(&destination),
@@ -46,11 +63,22 @@ impl<'a> Car<'a> {
         //     Destinations::East => east_destinations(positions),
         //     Destinations::West => west_destinations(positions),
         // };
-        Car{row, column, texture, path: vec![(row, column)]/*juste pour le momment */, position, speed:1 }
+        let sizy = (size as f64 * 0.9) as u32;
+        Car{row, column, texture, path: vec![(row, column)]/*juste pour le momment */, position, level_speed:1, speed, size: sizy }
+    }
+
+    
+    pub fn update_position(&mut self) {
+        self.row += (self.speed as i32) * self.level_speed;
+        println!("{:?}",self);
+    }
+
+    pub fn draw(&self, canvas: &mut Canvas<Window>) {
+        self.texture.apply_texture(canvas, self.row, self.column, self.size)
     }
 }
 
-fn north_spawn(destination: &Destinations)->(u32, u32){
+fn north_spawn(destination: &Destinations)->(i32, i32){
     if *destination == Destinations::West {
         return (0, 9);
     }
@@ -60,7 +88,7 @@ fn north_spawn(destination: &Destinations)->(u32, u32){
     (0, 11)
 }
 
-fn south_spawn(destination: &Destinations)->(u32, u32){
+fn south_spawn(destination: &Destinations)->(i32, i32){
     if *destination == Destinations::West {
         return (ROW-1, 12);
     }
@@ -70,7 +98,7 @@ fn south_spawn(destination: &Destinations)->(u32, u32){
     (ROW-1, 14)
 }
 
-fn west_spawn(destination: &Destinations)->(u32, u32){
+fn west_spawn(destination: &Destinations)->(i32, i32){
     if *destination == Destinations::West {
         return (9, 0);
     }
@@ -80,7 +108,7 @@ fn west_spawn(destination: &Destinations)->(u32, u32){
     (11, 0)
 }
 
-fn east_spawn(destination: &Destinations)->(u32, u32){
+fn east_spawn(destination: &Destinations)->(i32, i32){
     if *destination == Destinations::West {
         return (9, COLUMN-1);
     }

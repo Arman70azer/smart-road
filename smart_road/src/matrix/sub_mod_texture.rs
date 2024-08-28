@@ -3,12 +3,15 @@ use sdl2::video::WindowContext;
 use sdl2::rect::Rect;
 use sdl2::image::LoadTexture;
 
-#[derive(Copy, Clone)]
 pub enum Textures {
     Herbe,
     RoadRow,
     RoadCol,
     RoadCent,
+    BlackCar,
+    OrangeCar,
+    GreenCar,
+    BlueCar,
 }
 
 pub struct Texture<'a> {
@@ -22,6 +25,11 @@ impl<'a> Texture<'a> {
             Textures::RoadRow => "./src/images/road_east_west.png",
             Textures::RoadCol => "./src/images/road_north_south.png",
             Textures::RoadCent => "./src/images/center.png",
+            Textures::BlackCar => "./src/images/car_black.png",
+            Textures::OrangeCar => "./src/images/car_red.png",
+            Textures::BlueCar => "./src/images/car_blue.png",
+            Textures::GreenCar => "./src/images/car_green.png",
+
         };
 
         let texture = texture_creator.load_texture(filename).unwrap();

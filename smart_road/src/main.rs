@@ -1,5 +1,6 @@
 extern crate sdl2;
 use smart_road::matrix::matrix_and_canva; // Import the draw_matrix function
+use smart_road::cars::{Car, Destinations};
 use sdl2::image::InitFlag;
 use sdl2::pixels::Color;
 // use crate::sdl2::image::LoadTexture;

@@ -47,9 +47,11 @@ impl<'a> Car<'a> {
             Destinations::East=> east_spawn(&destination),
         };
 
-        let row = position.0; //* size as i32;
-        let column = position.1; //* size as i32;
-        let texture_type = match destination {
+        let row = position.0 * size as i32;
+        let column = position.1 * size as i32;
+        println!("Position: ({}, {}), Size: {}", position.0, position.1, size);
+
+        let texture_type: Textures = match destination {
             Destinations::East=> Textures::BlackCar,
             Destinations::West => Textures::OrangeCar,
             Destinations::North => Textures::BlueCar,
@@ -76,7 +78,7 @@ impl<'a> Car<'a> {
     }
 
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
-        self.texture.apply_texture(canvas, self.row, self.column, self.size)
+        self.texture.apply_texture(canvas, self.column, self.row, self.size)
     }
 }
 

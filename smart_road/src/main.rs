@@ -71,8 +71,13 @@ fn main() {
              car.update_position();
          }
 
-         cars.retain(|car| car.column <= COLUMN && car.row <= HEIGHT);
- 
+         cars.retain(|car| {
+            car.column >= 0
+                && car.column <= WIDTH
+                && car.row >= 0
+                && car.row <= HEIGHT
+        });
+        
          // Effacer le canevas
          canvas.set_draw_color(Color::RGB(0, 0, 0));
          canvas.clear();

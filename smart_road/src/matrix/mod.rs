@@ -58,6 +58,7 @@ pub fn matrix_and_canva<'a>(
     let texture_creator = canvas.texture_creator();
     let road_row_texture = Texture::new(&texture_creator, &Textures::RoadRow);
     let road_col_texture = Texture::new(&texture_creator, &Textures::RoadCol);
+    let road_cent_texture = Texture::new(&texture_creator, &Textures::RoadCent);
     let herbe_texture = Texture::new(&texture_creator, &Textures::Herbe);
 
     // Initialize the matrix with `Cell`s
@@ -69,6 +70,8 @@ pub fn matrix_and_canva<'a>(
                 &road_row_texture
             } else if col >= 8 && col <= 13 && row < 8 || col >= 8 && col <= 13 && row > 13  {
                 &road_col_texture
+            } else if row >= 8 && row <= 13 && col >= 8 && col <= 13 {
+                &road_cent_texture
             } else { 
                 &herbe_texture
             };

@@ -8,6 +8,7 @@ pub enum Textures {
     Herbe,
     RoadRow,
     RoadCol,
+    RoadCent,
 }
 
 pub struct Texture<'a> {
@@ -20,6 +21,7 @@ impl<'a> Texture<'a> {
             Textures::Herbe => "./src/images/herbes.png",
             Textures::RoadRow => "./src/images/road_east_west.png",
             Textures::RoadCol => "./src/images/road_north_south.png",
+            Textures::RoadCent => "./src/images/center.png",
         };
 
         let texture = texture_creator.load_texture(filename).unwrap();

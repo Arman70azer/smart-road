@@ -66,4 +66,20 @@ pub fn matrix_and_canva<'a>(
     for row in 0..num_of_rows {
         for col in 0..num_of_cols {
             let texture = 
-            if row >= 8 && row <= 13 && col < 8 || row >= 8 && row <= 13
+            if row >= 8 && row <= 13 && col < 8 || row >= 8 && row <= 13 && col > 13 { 
+                &road_row_texture
+            } else if col >= 8 && col <= 13 && row < 8 || col >= 8 && col <= 13 && row > 13  {
+                &road_col_texture
+            } else if row >= 8 && row <= 13 && col >= 8 && col <= 13 {
+                &road_cent_texture
+            } else { 
+                &herbe_texture
+            };
+            matrix[row as usize].push(Cell::new(texture));
+            println!("{} {}", row, col);
+        }
+    }
+
+    // Draw the matrix on the canvas
+    draw_matrix_in_canva(canvas, &mut matrix, cell_size);
+}

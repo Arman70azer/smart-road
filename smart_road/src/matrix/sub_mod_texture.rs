@@ -29,6 +29,4 @@ impl<'a> Texture<'a> {
     pub fn apply_texture(&self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, x: u32, y: u32, cell_size: u32) {
         let dest_rect = Rect::new(x as i32, y as i32, cell_size, cell_size);
         canvas.copy(&self.texture, None, Some(dest_rect)).unwrap();
-    }
-}
-
+   

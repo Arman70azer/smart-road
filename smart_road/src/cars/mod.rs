@@ -19,7 +19,8 @@ pub struct Car<'a> {
     pub position: (i32, i32),
     pub level_speed: i32,
     pub speed: u32,
-    pub size: u32
+    pub size: u32,
+    pub choc: i16,
 }
 
 impl<'a> fmt::Debug for Car<'a> {
@@ -46,8 +47,8 @@ impl<'a> Car<'a> {
             Destinations::East=> east_spawn(&destination),
         };
 
-        let row = position.0;
-        let column = position.1;
+        let row = position.0; //* size as i32;
+        let column = position.1; //* size as i32;
         let texture_type = match destination {
             Destinations::East=> Textures::BlackCar,
             Destinations::West => Textures::OrangeCar,
@@ -64,12 +65,13 @@ impl<'a> Car<'a> {
         //     Destinations::West => west_destinations(positions),
         // };
         let sizy = (size as f64 * 0.9) as u32;
-        Car{row, column, texture, path: vec![(row, column)]/*juste pour le momment */, position, level_speed:1, speed, size: sizy }
+        Car{row, column, texture, path: vec![(row, column)]/*juste pour le momment */, position, level_speed:1, speed, size: sizy, choc: 0 }
     }
 
     
     pub fn update_position(&mut self) {
         self.row += (self.speed as i32) * self.level_speed;
+        self.position = (self.row, self.column);
         println!("{:?}",self);
     }
 

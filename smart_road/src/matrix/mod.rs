@@ -40,17 +40,16 @@ pub fn draw_matrix_in_canva(canvas: &mut Canvas<Window>, matrix: &Matrix, cell_s
 }
 
 
-
+pub const ROW: u32 = 22;
+pub const COLUMN: u32 = 22; 
 pub fn matrix_and_canva<'a>(
     canvas: &mut Canvas<Window>,
     height: u32,
     width: u32
 ) {
-    let num_of_rows = 22;
-    let num_of_cols = 22;
 
-    let cell_size_width = width / num_of_cols as u32;
-    let cell_size_height = height / num_of_rows as u32;
+    let cell_size_width = width / COLUMN as u32;
+    let cell_size_height = height / ROW as u32;
 
 
     let cell_size: u32 = cell_size_width.min(cell_size_height);
@@ -62,9 +61,9 @@ pub fn matrix_and_canva<'a>(
     let herbe_texture = Texture::new(&texture_creator, &Textures::Herbe);
 
     // Initialize the matrix with `Cell`s
-    let mut matrix: Matrix = vec![vec![]; num_of_rows as usize];
-    for row in 0..num_of_rows {
-        for col in 0..num_of_cols {
+    let mut matrix: Matrix = vec![vec![]; ROW as usize];
+    for row in 0..ROW {
+        for col in 0..COLUMN {
             let texture = 
             if row >= 8 && row <= 13 && col < 8 || row >= 8 && row <= 13 && col > 13 { 
                 &road_row_texture

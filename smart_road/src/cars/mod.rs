@@ -1,4 +1,4 @@
-use crate::matrix::sub_mod_texture::Texture;
+use crate::matrix::{sub_mod_texture::Texture,ROW, COLUMN};
 use sdl2::video::WindowContext;
 use sdl2::render::TextureCreator;
 
@@ -41,10 +41,10 @@ fn north_spawn(destination: Destinations)->(u32, u32){
 
 fn south_spawn(destination: Destinations)->(u32, u32){
     if destination == Destinations::West {
-        return (0, 9);
+        return (COLUMN-1, 9);
     }
     if destination== Destinations::South{
-        return (0, 10);
+        return (COLUMN-1, 10);
     }
     (0, 11)
 }

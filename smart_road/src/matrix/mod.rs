@@ -29,30 +29,31 @@ impl<'a> Cell<'a> {
 
 pub type Matrix<'a> = Vec<Vec<Cell<'a>>>;
 
-pub fn draw_matrix_in_canva(canvas: &mut Canvas<Window>, matrix: &Matrix, cell_size: u32) {
+pub fn draw_matrix_in_canva(canvas: &mut Canvas<Window>, matrix: &Matrix, cell_size: i32) {
     for (i, row) in matrix.iter().enumerate() {
         for (j, cell) in row.iter().enumerate() {
-            let x = (j as u32) * cell_size;
-            let y = (i as u32) * cell_size;
-            cell.texture.apply_texture(canvas, x, y, cell_size);
+            let x: i32 = (j as i32) * cell_size;
+            let y: i32 = (i as i32) * cell_size;
+            cell.texture.apply_texture(canvas, x, y, cell_size as u32);
         }
     }
 }
 
 
-pub const ROW: u32 = 22;
-pub const COLUMN: u32 = 22; 
+pub const ROW: i32 = 22;
+pub const COLUMN: i32 = 22; 
+
 pub fn matrix_and_canva<'a>(
     canvas: &mut Canvas<Window>,
-    height: u32,
-    width: u32
+    height: i32,
+    width: i32
 ) {
 
-    let cell_size_width = width / COLUMN as u32;
-    let cell_size_height = height / ROW as u32;
+    let cell_size_width = width / COLUMN;
+    let cell_size_height = height / ROW ;
 
 
-    let cell_size: u32 = cell_size_width.min(cell_size_height);
+    let cell_size = cell_size_width.min(cell_size_height);
 
     let texture_creator = canvas.texture_creator();
     let road_row_texture = Texture::new(&texture_creator, &Textures::RoadRow);
@@ -75,7 +76,6 @@ pub fn matrix_and_canva<'a>(
                 &herbe_texture
             };
             matrix[row as usize].push(Cell::new(texture));
-            println!("{} {}", row, col);
         }
     }
 

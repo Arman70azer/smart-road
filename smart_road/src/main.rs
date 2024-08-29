@@ -4,7 +4,6 @@ use smart_road::matrix::{matrix_and_canva, ROW, COLUMN}; // Import the draw_matr
 use smart_road::cars::{Car, Destinations};
 use sdl2::image::InitFlag;
 use sdl2::pixels::Color;
-// use crate::sdl2::image::LoadTexture;
 
 const WIDTH: i32 = 800; // Example width
 const HEIGHT: i32 = 800; // Example height
@@ -49,7 +48,7 @@ fn main() {
              match event {
                  sdl2::event::Event::Quit { .. } => break 'running,
                  sdl2::event::Event::KeyDown { keycode, .. } => {
-                     if let Some(sdl2::keyboard::Keycode::Left) = keycode {
+                     if let Some(sdl2::keyboard::Keycode::Down) = keycode {
                         let new_car = Car::new(Destinations::North, Destinations::South , &texture_creator,
                              SQUARE_SPEED as u32,
                              cell_size as u32,
@@ -71,8 +70,13 @@ fn main() {
              car.update_position();
          }
 
-         cars.retain(|car| car.column <= COLUMN && car.row <= HEIGHT);
- 
+         cars.retain(|car| {
+            car.column >= 0
+                && car.column <= WIDTH
+                && car.row >= 0
+                && car.row <= HEIGHT
+        });
+        
          // Effacer le canevas
          canvas.set_draw_color(Color::RGB(0, 0, 0));
          canvas.clear();

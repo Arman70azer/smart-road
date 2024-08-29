@@ -19,7 +19,9 @@ pub struct Car<'a> {
     pub position: (i32, i32),
     pub level_speed: i32,
     pub speed: u32,
-    pub size: u32
+    pub size: u32,
+    pub choc: i16,
+    //Penser à mettre un temps, 
 }
 
 impl<'a> fmt::Debug for Car<'a> {
@@ -46,9 +48,11 @@ impl<'a> Car<'a> {
             Destinations::East=> east_spawn(&destination),
         };
 
-        let row = position.0;
-        let column = position.1;
-        let texture_type = match destination {
+        let row = position.0 * size as i32;
+        let column = position.1 * size as i32;
+        println!("Position: ({}, {}), Size: {}", position.0, position.1, size);
+
+        let texture_type: Textures = match destination {
             Destinations::East=> Textures::BlackCar,
             Destinations::West => Textures::OrangeCar,
             Destinations::North => Textures::BlueCar,
@@ -57,6 +61,9 @@ impl<'a> Car<'a> {
 
         let texture = Texture::new(texture_creator, &texture_type);
 
+        //ICI il faut créer les fn destinations pour qu'il renvoie un Vec avec à l'intérieur les positions de
+        //toutes les cases sur lesquelles la voiture devra ce rendre pour arriver à destination.
+
         // let path = match destination {
         //     Destinations::South => south_destinations(positions),
         //     Destinations::North => north_destinations(positions),
@@ -64,17 +71,20 @@ impl<'a> Car<'a> {
         //     Destinations::West => west_destinations(positions),
         // };
         let sizy = (size as f64 * 0.9) as u32;
-        Car{row, column, texture, path: vec![(row, column)]/*juste pour le momment */, position, level_speed:1, speed, size: sizy }
+        Car{row, column, texture, path: vec![(row, column)]/*remplacer avec juste path */, position, level_speed:1, speed, size: sizy, choc: 0 }
     }
 
     
+    //Ici Il faut de préfèrence finir d'apporter le path à la voiture avant de commencer
+    //la voiture devra ce déplacer à l'étape suivante en utilsant comme réfèrence la car.position et en cherchant l'étape suivante dans car.path
     pub fn update_position(&mut self) {
         self.row += (self.speed as i32) * self.level_speed;
+        self.position = (self.row, self.column);
         println!("{:?}",self);
     }
 
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
-        self.texture.apply_texture(canvas, self.row, self.column, self.size)
+        self.texture.apply_texture(canvas, self.column, self.row, self.size)
     }
 }
 

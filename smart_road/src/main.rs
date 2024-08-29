@@ -48,18 +48,22 @@ fn main() {
              match event {
                  sdl2::event::Event::Quit { .. } => break 'running,
                  sdl2::event::Event::KeyDown { keycode, .. } => {
-                     if let Some(sdl2::keyboard::Keycode::Down) = keycode {
-                        let new_car = Car::new(Destinations::North, Destinations::South , &texture_creator,
-                             SQUARE_SPEED as u32,
-                             cell_size as u32,
-                         );
-                         cars.push(new_car);
-                        if let Some(first_car) = cars.iter().nth(0) {
-                            println!("{:?}", first_car);
-                        } else {
-                            println!("No cars in the list.");
-                        }
-                     }
+                        match keycode {
+                            Some(sdl2::keyboard::Keycode::Escape) => break 'running,
+                            Some(sdl2::keyboard::Keycode::Down) => {
+                                smart_road::utils::random_cars(Destinations::North, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            }
+                            Some(sdl2::keyboard::Keycode::Up) => {
+                                smart_road::utils::random_cars(Destinations::South, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            }
+                            Some(sdl2::keyboard::Keycode::Left) => {
+                                smart_road::utils::random_cars(Destinations::East, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            }
+                            Some(sdl2::keyboard::Keycode::Right) => {
+                                smart_road::utils::random_cars(Destinations::West, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            }
+                            _ => {}
+                        } 
                  }
                  _ => {}
              }

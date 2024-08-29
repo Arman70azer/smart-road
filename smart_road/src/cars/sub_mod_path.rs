@@ -1,4 +1,7 @@
 use crate::matrix::{COLUMN, ROW};
+
+//Toutes ces fn servent à créer le car.path de la voiture et permettent de savoir le chemin de celle-ci
+
 pub fn south_destinations(row: i32, column: i32, cell_size: u32) -> Vec<(i32, i32)> {
     let mut result: Vec<(i32, i32)> = Vec::new();
 

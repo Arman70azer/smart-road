@@ -51,15 +51,14 @@ impl<'a> Car<'a> {
         size: u32,
     ) -> Self {
         let position = match spawn {
-            Destinations::North => north_spawn(&destination),
-            Destinations::South => south_spawn(&destination),
-            Destinations::West => west_spawn(&destination),
-            Destinations::East => east_spawn(&destination),
+            Destinations::North => north_spawn(&destination, size),
+            Destinations::South => south_spawn(&destination, size),
+            Destinations::West => west_spawn(&destination, size),
+            Destinations::East => east_spawn(&destination, size),
         };
 
-        let row = position.0 * size as i32;
-        let column = position.1 * size as i32;
-        println!("Position: ({}, {}), Size: {}", position.0, position.1, size);
+        let row = position.0;
+        let column = position.1;
 
         let texture_type: Textures = match destination {
             Destinations::East => Textures::BlackCar,
@@ -73,18 +72,19 @@ impl<'a> Car<'a> {
         //ICI il faut créer les fn destinations pour qu'il renvoie un Vec avec à l'intérieur les positions de
         //toutes les cases sur lesquelles la voiture devra ce rendre pour arriver à destination.
 
-        // let path = match destination {
-        //     Destinations::South => south_destinations(positions),
-        //     Destinations::North => north_destinations(positions),
-        //     Destinations::East => east_destinations(positions),
-        //     Destinations::West => west_destinations(positions),
-        // };
+        let path = match destination {
+            Destinations::South => south_destinations(row, column, size),
+            Destinations::North => south_destinations(row, column, size),
+            Destinations::East => south_destinations(row, column, size),
+            Destinations::West => south_destinations(row, column, size),
+        };
+
         let sizy = (size as f64 * 0.9) as u32;
         Car {
             row,
             column,
             texture,
-            path: vec![(row, column)], /*remplacer avec juste path */
+            path, /*remplacer avec juste path */
             position,
             level_speed: 1,
             speed,
@@ -94,60 +94,29 @@ impl<'a> Car<'a> {
         }
     }
 
-    //Ici Il faut de préfèrence finir d'apporter le path à la voiture avant de commencer
-    //la voiture devra ce déplacer à l'étape suivante en utilsant comme réfèrence la car.position et en cherchant l'étape suivante dans car.path
-
+    //Va chercher l'étape suivante puis redirige sur to_next_step pour mettre à jour row et column
     pub fn update_position(&mut self) {
-        // Déplacer la voiture en fonction de sa vitesse et direction actuelle
-        match self.destination {
-            Destinations::South => {
-                if self.position.0 < 395 {
-                    self.row += (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                    println!("lalala");
-                } else if self.position.0 == 395 {
-                    self.change_direction_to_est();
-                    self.column += (self.speed as i32) * self.level_speed;
+        let mut next_step: Option<(i32, i32)> = None;
+
+        for (index, position) in self.path.iter().enumerate() {
+            if *position == self.position {
+                // Vérifie s'il y a une prochaine étape dans le chemin
+                if index + 1 < self.path.len() {
+                    next_step = Some(self.path[index + 1]);
                 }
-            }
-            Destinations::North => {
-                if self.position.0 > 0 {
-                    self.row -= (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.0 == 0 {
-                    self.change_direction_to_est();
-                    self.column += (self.speed as i32) * self.level_speed;
-                }
-            }
-            Destinations::East => {
-                if self.position.1 < 395 {
-                    self.column += (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.1 == 395 {
-                    self.change_direction_to_est();
-                    self.row += (self.speed as i32) * self.level_speed;
-                }
-            }
-            Destinations::West => {
-                if self.position.1 > 0 {
-                    self.column -= (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.1 == 0 {
-                    self.change_direction_to_est();
-                    self.row += (self.speed as i32) * self.level_speed;
-                }
+                break;
             }
         }
-
-        println!("{:?}", self);
+        if let Some(step) = next_step {
+            to_the_next_step(self, step)
+        }
+        // } else {
+        //      println!("Vous êtes à la fin du chemin ou la position actuelle n'est pas trouvée.");
+        //      println!("Si ce message apparait c'est qu'il n'y a pas assez d'étapes avant la fin du trajets => Il faut que la dernière étape est une valeur hors champs!!!!")
+        // }
     }
 
-    // Définir change_direction comme une méthode d'instance de Car
-    pub fn change_direction_to_est(&mut self) {
-        self.level_speed = 0;
-        // Commencer à déplacer la voiture horizontalement (vers la droite)
-        // self.level_speed = 1;
-    }
+    
 
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
         self.texture
@@ -155,42 +124,112 @@ impl<'a> Car<'a> {
     }
 }
 
-fn north_spawn(destination: &Destinations) -> (i32, i32) {
+fn north_spawn(destination: &Destinations, cell_size: u32) -> (i32, i32) {
     if *destination == Destinations::West {
-        return (0, 8);
+        return (0, 8*cell_size as i32);
     }
     if *destination == Destinations::South {
-        return (0, 9);
+        return (0, 9*cell_size as i32);
     }
-    (0, 10)
+    (0, 10*cell_size as i32)
 }
 
-fn south_spawn(destination: &Destinations) -> (i32, i32) {
+fn south_spawn(destination: &Destinations, cell_size: u32) -> (i32, i32) {
     if *destination == Destinations::West {
-        return (ROW - 1, 11);
+        return (ROW*cell_size as i32, 11*cell_size as i32);
     }
     if *destination == Destinations::North {
-        return (ROW - 1, 12);
+        return (ROW*cell_size as i32, 12*cell_size as i32);
     }
-    (ROW - 1, 13)
+    (ROW*cell_size as i32, 13*cell_size as i32)
 }
 
-fn west_spawn(destination: &Destinations) -> (i32, i32) {
+fn west_spawn(destination: &Destinations, cell_size: u32) -> (i32, i32) {
     if *destination == Destinations::North {
-        return (11, 0);
+        return (11*cell_size as i32, 0);
     }
     if *destination == Destinations::East {
-        return (12, 0);
+        return (12*cell_size as i32, 0);
     }
-    (13, 0)
+    (13*cell_size as i32, 0)
 }
 
-fn east_spawn(destination: &Destinations) -> (i32, i32) {
+fn east_spawn(destination: &Destinations, cell_size: u32) -> (i32, i32) {
     if *destination == Destinations::North {
-        return (8, COLUMN - 1);
+        return (8*cell_size as i32, COLUMN*cell_size as i32);
     }
     if *destination == Destinations::West {
-        return (9, COLUMN - 1);
+        return (9*cell_size as i32, COLUMN*cell_size as i32);
     }
-    (10, COLUMN - 1)
+    (10*cell_size as i32, COLUMN*cell_size as i32)
+}
+
+fn south_destinations(row: i32, column: i32, cell_size: u32) -> Vec<(i32, i32)> {
+    let mut result: Vec<(i32, i32)> = Vec::new();
+
+    result.push((row, column));
+    
+    if row == 0 && column == 9*cell_size as i32 {
+        let mut new_row = row+1;
+        
+        while new_row < 24 {
+            result.push((new_row * cell_size as i32, column));
+            new_row += 1;
+        }
+    }
+
+    if row == 10*cell_size as i32 && column == COLUMN*cell_size as i32{
+        //let mut new_column = column/cell_size as i32;
+        let mut new_column: i32 = column/cell_size as i32; 
+        while new_column > 10 {
+            new_column-= 1;
+            result.push((row, new_column*cell_size as i32));
+        }
+        let mut new_row: i32=row/cell_size as i32;
+        println!("{}", new_row);
+        while new_row < 23 {
+            new_row+= 1;
+            result.push((new_row*cell_size as i32, new_column*cell_size as i32));
+        }
+        println!("{}, {}sddsd", row, new_row);
+    }
+
+    if row == 13* cell_size as i32 && column == 0{
+        //let mut new_column = column/cell_size as i32;
+        let mut new_column: i32 = column/cell_size as i32; 
+        while new_column < 8 {
+            new_column+= 1;
+            result.push((row, new_column*cell_size as i32));
+        }
+        let mut new_row: i32=row/cell_size as i32;
+        println!("{}", new_row);
+        while new_row < 23 {
+            new_row+= 1;
+            result.push((new_row*cell_size as i32, new_column*cell_size as i32));
+        }
+    }
+    println!("{:?}", result);
+    
+    result // Retourne le résultat final
+}
+
+fn to_the_next_step(car: &mut Car, next_step: (i32, i32)){
+
+    let calcul_speed = (car.speed as i32) * car.level_speed;
+
+    if car.row == next_step.0 && car.column == next_step.1{
+        car.position = next_step;
+    }else if car.position.0 == next_step.0 && car.position.1 != next_step.1{
+        if car.position.1 > next_step.1{
+            car.column-=calcul_speed;
+        }else{
+            car.column+= calcul_speed;
+        }
+    }else if car.position.0 != next_step.0 && car.position.1 == next_step.1{
+        if car.position.0 > next_step.0{
+            car.row-=calcul_speed;
+        }else{
+            car.row+=calcul_speed;
+        }
+    }
 }

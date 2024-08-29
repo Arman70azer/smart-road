@@ -5,6 +5,8 @@ use crate::matrix::{
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use std::fmt;
+pub mod sub_mod_path;
+use sub_mod_path::{east_destination, north_destinations, south_destinations, west_destination};
 
 #[derive(PartialEq,Clone,Copy)]
 pub enum Destinations {
@@ -74,9 +76,9 @@ impl<'a> Car<'a> {
 
         let path = match destination {
             Destinations::South => south_destinations(row, column, size),
-            Destinations::North => south_destinations(row, column, size),
-            Destinations::East => south_destinations(row, column, size),
-            Destinations::West => south_destinations(row, column, size),
+            Destinations::North => north_destinations(row, column, size),
+            Destinations::East => east_destination(row, column, size),
+            Destinations::West => west_destination(row, column, size),
         };
 
         let sizy = (size as f64 * 0.9) as u32;
@@ -164,54 +166,6 @@ fn east_spawn(destination: &Destinations, cell_size: u32) -> (i32, i32) {
     (10*cell_size as i32, COLUMN*cell_size as i32)
 }
 
-fn south_destinations(row: i32, column: i32, cell_size: u32) -> Vec<(i32, i32)> {
-    let mut result: Vec<(i32, i32)> = Vec::new();
-
-    result.push((row, column));
-    
-    if row == 0 && column == 9*cell_size as i32 {
-        let mut new_row = row+1;
-        
-        while new_row < 24 {
-            result.push((new_row * cell_size as i32, column));
-            new_row += 1;
-        }
-    }
-
-    if row == 10*cell_size as i32 && column == COLUMN*cell_size as i32{
-        //let mut new_column = column/cell_size as i32;
-        let mut new_column: i32 = column/cell_size as i32; 
-        while new_column > 10 {
-            new_column-= 1;
-            result.push((row, new_column*cell_size as i32));
-        }
-        let mut new_row: i32=row/cell_size as i32;
-        println!("{}", new_row);
-        while new_row < 23 {
-            new_row+= 1;
-            result.push((new_row*cell_size as i32, new_column*cell_size as i32));
-        }
-        println!("{}, {}sddsd", row, new_row);
-    }
-
-    if row == 13* cell_size as i32 && column == 0{
-        //let mut new_column = column/cell_size as i32;
-        let mut new_column: i32 = column/cell_size as i32; 
-        while new_column < 8 {
-            new_column+= 1;
-            result.push((row, new_column*cell_size as i32));
-        }
-        let mut new_row: i32=row/cell_size as i32;
-        println!("{}", new_row);
-        while new_row < 23 {
-            new_row+= 1;
-            result.push((new_row*cell_size as i32, new_column*cell_size as i32));
-        }
-    }
-    println!("{:?}", result);
-    
-    result // Retourne le résultat final
-}
 
 fn to_the_next_step(car: &mut Car, next_step: (i32, i32)){
 

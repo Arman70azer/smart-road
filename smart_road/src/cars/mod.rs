@@ -98,24 +98,17 @@ impl<'a> Car<'a> {
 
     //Va chercher l'étape suivante puis redirige sur to_next_step pour mettre à jour row et column
     pub fn update_position(&mut self) {
-        let mut next_step: Option<(i32, i32)> = None;
 
         for (index, position) in self.path.iter().enumerate() {
             if *position == self.position {
                 // Vérifie s'il y a une prochaine étape dans le chemin
                 if index + 1 < self.path.len() {
-                    next_step = Some(self.path[index + 1]);
+                    let next_step = self.path[index + 1];
+                    to_the_next_step(self, next_step);
                 }
                 break;
             }
         }
-        if let Some(step) = next_step {
-            to_the_next_step(self, step)
-        }
-        // } else {
-        //      println!("Vous êtes à la fin du chemin ou la position actuelle n'est pas trouvée.");
-        //      println!("Si ce message apparait c'est qu'il n'y a pas assez d'étapes avant la fin du trajets => Il faut que la dernière étape est une valeur hors champs!!!!")
-        // }
     }
 
     

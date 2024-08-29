@@ -77,10 +77,36 @@ impl<'a> Car<'a> {
     
     //Ici Il faut de préfèrence finir d'apporter le path à la voiture avant de commencer
     //la voiture devra ce déplacer à l'étape suivante en utilsant comme réfèrence la car.position et en cherchant l'étape suivante dans car.path
+    
     pub fn update_position(&mut self) {
+        // Déplacer la voiture en fonction de sa vitesse et direction actuelle
+        if self.position.0 < 395 {
         self.row += (self.speed as i32) * self.level_speed;
         self.position = (self.row, self.column);
-        println!("{:?}",self);
+        println!("lalala");
+        }
+        // Vérifier si la voiture a atteint la position 395
+        if self.position.0 == 395 {
+            self.change_direction();  // Appeler la méthode pour changer de direction
+        }
+
+        // Continuer à mettre à jour la position même après avoir changé de direction
+        if self.position.0 >= 395 {
+            self.column += (self.speed as i32) * self.level_speed;
+        }
+
+        println!("{:?}", self);
+    }
+
+    // Définir change_direction comme une méthode d'instance de Car
+    fn change_direction(&mut self) {
+        // Arrêter de déplacer la voiture verticalement
+        if self.position.0 == 395 {
+            self.level_speed = 0;
+            println!("ciicici")
+        }
+        // Commencer à déplacer la voiture horizontalement (vers la droite)
+        self.level_speed = 1;
     }
 
     pub fn draw(&self, canvas: &mut Canvas<Window>) {

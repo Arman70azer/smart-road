@@ -146,7 +146,7 @@ impl<'a> Car<'a> {
     pub fn change_direction_to_est(&mut self) {
         self.level_speed = 0;
         // Commencer à déplacer la voiture horizontalement (vers la droite)
-        self.level_speed = 1;
+        // self.level_speed = 1;
     }
 
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
@@ -157,40 +157,40 @@ impl<'a> Car<'a> {
 
 fn north_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::West {
-        return (0, 9);
+        return (0, 8);
     }
     if *destination == Destinations::South {
-        return (0, 10);
+        return (0, 9);
     }
-    (0, 11)
+    (0, 10)
 }
 
 fn south_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::West {
+        return (ROW - 1, 11);
+    }
+    if *destination == Destinations::North {
         return (ROW - 1, 12);
     }
-    if *destination == Destinations::South {
-        return (ROW - 1, 13);
-    }
-    (ROW - 1, 14)
+    (ROW - 1, 13)
 }
 
 fn west_spawn(destination: &Destinations) -> (i32, i32) {
-    if *destination == Destinations::West {
-        return (9, 0);
+    if *destination == Destinations::North {
+        return (11, 0);
     }
-    if *destination == Destinations::South {
-        return (10, 0);
+    if *destination == Destinations::East {
+        return (12, 0);
     }
-    (11, 0)
+    (13, 0)
 }
 
 fn east_spawn(destination: &Destinations) -> (i32, i32) {
+    if *destination == Destinations::North {
+        return (8, COLUMN - 1);
+    }
     if *destination == Destinations::West {
         return (9, COLUMN - 1);
     }
-    if *destination == Destinations::South {
-        return (10, COLUMN - 1);
-    }
-    (11, COLUMN - 1)
+    (10, COLUMN - 1)
 }

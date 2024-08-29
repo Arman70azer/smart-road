@@ -2,9 +2,8 @@ use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use crate::cars::{Car, Destinations};
-use sdl2::render::{TextureCreator, Canvas};
+use sdl2::render::{TextureCreator};
 use rand::prelude::SliceRandom;
-use rand::Rng; 
 
 
 pub fn applicate_texture(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, texture_creator: &sdl2::render::TextureCreator<sdl2::video::WindowContext>, filename: String, heigth: u32, width: u32) {

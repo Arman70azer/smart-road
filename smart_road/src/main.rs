@@ -85,4 +85,12 @@ fn main() {
         canvas.clear();
         matrix_and_canva(&mut canvas, HEIGHT, WIDTH);
 
-        canvas.set_draw_color(Color::RGB
+        canvas.set_draw_color(Color::RGB(255, 0, 0));
+        for car in &cars {
+            car.draw(&mut canvas);
+        }
+
+        canvas.present();
+        std::thread::sleep(Duration::from_millis(16));
+    }
+}

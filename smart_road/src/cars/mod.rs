@@ -90,12 +90,9 @@ impl<'a> Car<'a> {
     pub fn update_position(&mut self) {
         match self.destination {
             Destinations::East => {
-                // BON
                 if self.position.0 < 398 {
-                    // 395
                     self.row += (self.speed as i32) * self.level_speed;
                     self.position = (self.row, self.column);
-                    println!("lalala");
                 } else if self.position.0 == 398 && self.column >= 360 {
                     self.change_direction();
                     self.column += (self.speed as i32) * self.level_speed;
@@ -110,7 +107,6 @@ impl<'a> Car<'a> {
                     self.position = (self.row, self.column);
                 }
             }
-
             Destinations::North => {
                 if self.position.1 < 398 {
                     self.column += (self.speed as i32) * self.level_speed;
@@ -129,7 +125,6 @@ impl<'a> Car<'a> {
                     self.position = (self.row, self.column);
                 }
             }
-
             Destinations::South => {
                 if self.position.1 < 288 {
                     self.column += (self.speed as i32) * self.level_speed;
@@ -148,10 +143,8 @@ impl<'a> Car<'a> {
                     self.position = (self.row, self.column);
                 }
             }
-
             Destinations::West => {
                 if self.position.0 < 288 {
-                    // 395
                     self.row += (self.speed as i32) * self.level_speed;
                     self.position = (self.row, self.column);
                     println!("lalala");
@@ -170,9 +163,9 @@ impl<'a> Car<'a> {
                 }
             }
         }
-
         println!("{:?}", self);
     }
+    
 
     // Définir change_direction comme une méthode d'instance de Car
     pub fn change_direction(&mut self) {
@@ -221,3 +214,8 @@ fn east_spawn(destination: &Destinations) -> (i32, i32) {
     }
     (10, COLUMN - 1)
 }
+
+pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
+    let mut collisions = Vec::new();
+    
+    f

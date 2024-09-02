@@ -51,6 +51,11 @@ fn main() {
                             see_tab = !see_tab;
                             last_action_time = Instant::now();
                         }
+
+                        Some(sdl2::keyboard::Keycode::A) => {
+                            cars.refresh();
+                            last_action_time = Instant::now();
+                        }
         
                         _ => {
                             // Vérifiez le délai d'action pour les autres touches

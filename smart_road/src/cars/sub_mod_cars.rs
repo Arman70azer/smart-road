@@ -8,6 +8,8 @@ pub struct Cars<'a> {
     pub max_time: Duration,
     pub min_time: Duration,
     pub close_calls: i16,
+    pub min_velocity: f64,
+    pub max_velocity: f64
 }
 
 impl <'a>Cars<'a> {
@@ -18,9 +20,23 @@ impl <'a>Cars<'a> {
             cars_passed: 0,
             close_calls:0,
             max_time: Duration::new(0, 0),
-            min_time: Duration::new(100, 0)
+            min_time: Duration::new(100, 0),
+            min_velocity: 0.0,
+            max_velocity: 0.0,
         }
     }
+
+    pub fn refresh(&mut self) {
+        self.cars.clear();
+        self.cars_passed = 0;
+        self.close_calls = 0;
+        self.collisions = 0;
+        self.max_time = Duration::new(0, 0); 
+        self.min_time = Duration::new(100, 0);
+        self.max_velocity = 0.0;
+        self.min_velocity = 0.0;
+    }
+    
 
     pub fn handle_collisions(&mut self) {
         let collisions = detect_collisions(&mut self.cars); // Appelle la méthode pour détecter les collisions
@@ -58,7 +74,7 @@ impl <'a>Cars<'a> {
 
     pub fn retain(&mut self, heigth: i32, width: i32 ){
         
-        self.update_timer(width, heigth);
+        self.update_timer_and_velocity(width, heigth);
 
         let before = self.cars.len();
         self.cars.retain(|car| {
@@ -74,7 +90,7 @@ impl <'a>Cars<'a> {
         }
     }
 
-    fn update_timer(&mut self, width: i32, heigth: i32){
+    fn update_timer_and_velocity(&mut self, width: i32, heigth: i32){
        
         let mut cars_to_remove = Vec::new();
         for car in &self.cars {
@@ -92,6 +108,25 @@ impl <'a>Cars<'a> {
             if car.timer < self.min_time || self.min_time == Duration::new(u64::MAX, 999_999_999) {
                 let rounded_seconds = round_to_three_decimal_places(car.timer.as_secs_f64());
                 self.min_time = Duration::from_secs_f64(rounded_seconds);
+            }
+
+             // Calcul de la vitesse
+            let path_len = car.path.len() as f64; // Assurez-vous que la longueur du chemin est en f64
+            let size = car.size as f64; // Assurez-vous que la taille est en f64
+            let timer_secs = car.timer.as_secs_f64(); // Temps en secondes
+
+            let velocity = if timer_secs > 0.0 {
+                (path_len * size) / timer_secs
+            } else {
+                0.0
+            };
+
+            // Mettre à jour la vitesse minimale et maximale
+            if (velocity < self.min_velocity && velocity > 0.0) || self.min_velocity == 0.0 {
+                self.min_velocity = round_to_three_decimal_places(velocity);
+            }
+            if velocity > self.max_velocity {
+                self.max_velocity = round_to_three_decimal_places(velocity);
             }
         }
     }

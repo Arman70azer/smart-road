@@ -18,11 +18,12 @@ pub fn display_stats(
 
     let stats = vec![
         format!("Statistics"),
-        format!("Cars Passed: {}", 1),
-        format!("Max velocity: {}", 1),
-        format!("Min velocity: {}", 1),
+        format!("Cars Passed: {}", cars.cars_passed),
+        format!("Max velocity: {}px/s", cars.max_velocity),
+        format!("Min velocity: {}px/s", cars.min_velocity),
         format!("Max Time: {:?}", cars.max_time),
         format!("Min Time: {:?}", cars.min_time),
+        format!("Collisions: {}", cars.collision()),
         format!("Close Calls: {}", 3),
     ];
 

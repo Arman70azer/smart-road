@@ -2,6 +2,8 @@ use crate::matrix::{
     sub_mod_texture::{Texture, Textures},
     COLUMN, ROW,
 };
+mod sub_mod_path;
+use sub_mod_path::{east_destination, west_destination, north_destinations, south_destinations};
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use std::fmt;
@@ -21,7 +23,9 @@ pub struct Car<'a> {
     pub speed: u32,
     pub size: u32,
     pub choc: i16,
+    pub path: Vec<(i32, i32)>,
     pub destination: Destinations,
+    pub index_path: u8,
     //Penser à mettre un temps,
 }
 impl<'a> fmt::Debug for Car<'a> {
@@ -63,108 +67,53 @@ impl<'a> Car<'a> {
         let texture = Texture::new(texture_creator, &texture_type);
         //ICI il faut créer les fn destinations pour qu'il renvoie un Vec avec à l'intérieur les positions de
         //toutes les cases sur lesquelles la voiture devra ce rendre pour arriver à destination.
-        // let path = match destination {
-        //     Destinations::South => south_destinations(positions),
-        //     Destinations::North => north_destinations(positions),
-        //     Destinations::East => east_destinations(positions),
-        //     Destinations::West => west_destinations(positions),
-        // };
+        let path = match destination {
+            Destinations::South => south_destinations(row, column, size),
+            Destinations::North => north_destinations(row, column, size),
+            Destinations::East => east_destination(row, column, size),
+            Destinations::West => west_destination(row, column, size),
+        };
         let sizy = (size as f64 * 0.9) as u32;
         Car {
             row,
             column,
             texture,
             position,
+            path,
             level_speed: 1,
             speed,
             size: sizy,
             choc: 0,
             destination,
+            index_path: 0,
         }
-    }
-    //Ici Il faut de préfèrence finir d'apporter le path à la voiture avant de commencer
-    //la voiture devra ce déplacer à l'étape suivante en utilsant comme réfèrence la car.position et en cherchant l'étape suivante dans car.path
-    // Déplacer la voiture en fonction de sa vitesse et direction actuelle
-    pub fn update_position(&mut self) {
-        match self.destination {
-            Destinations::East => {
-                if self.position.0 < 398 {
-                    self.row += (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.0 == 398 && self.column >= 360 {
-                    self.change_direction();
-                    self.column += (self.speed as i32) * self.level_speed;
-                } else if self.position.0 > 470 {
-                    self.row -= (self.speed as i32) / self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.0 <= 470 && self.column >= 360 {
-                    self.change_direction();
-                    self.column += (self.speed as i32) * self.level_speed;
-                } else {
-                    self.column += (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                }
-            }
-            Destinations::North => {
-                if self.position.1 < 398 {
-                    self.column += (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.1 == 398 && self.row >= 360 {
-                    self.change_direction();
-                    self.row -= (self.speed as i32) * self.level_speed;
-                } else if self.position.1 > 470 {
-                    self.column -= (self.speed as i32) / self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.1 <= 470 && self.row >= 360 {
-                    self.change_direction();
-                    self.row -= (self.speed as i32) * self.level_speed;
-                } else {
-                    self.row -= (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                }
-            }
-            Destinations::South => {
-                if self.position.1 < 288 {
-                    self.column += (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.1 == 288 && self.row >= 360 {
-                    self.change_direction();
-                    self.row += (self.speed as i32) * self.level_speed;
-                } else if self.position.1 > 362 {
-                    self.column -= (self.speed as i32) / self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.1 <= 362 && self.row >= 360 {
-                    self.change_direction();
-                    self.row += (self.speed as i32) * self.level_speed;
-                } else {
-                    self.row += (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                }
-            }
-            Destinations::West => {
-                if self.position.0 < 288 {
-                    self.row += (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                    println!("lalala");
-                } else if self.position.0 == 288 && self.column >= 360 {
-                    self.change_direction();
-                    self.column += (self.speed as i32) * self.level_speed;
-                } else if self.position.0 > 362 {
-                    self.row -= (self.speed as i32) / self.level_speed;
-                    self.position = (self.row, self.column);
-                } else if self.position.0 <= 362 && self.column >= 360 {
-                    self.change_direction();
-                    self.column -= (self.speed as i32) * self.level_speed;
-                } else {
-                    self.column -= (self.speed as i32) * self.level_speed;
-                    self.position = (self.row, self.column);
-                }
-            }
-        }
-        println!("{:?}", self);
     }
     
-    // Définir change_direction comme une méthode d'instance de Car
+    pub fn update_position(&mut self) {
+        if let Some(next_position) = self.path.get(self.index_path as usize + 1) {
+            if next_position.0 == self.row && next_position.1 == self.column {
+                self.position = (self.row, self.column);
+                self.index_path += 1;
+            } else {
+                if next_position.0 != self.row {
+                    if next_position.0 > self.row {
+                        self.row += self.speed as i32;
+                    } else {
+                        self.row -= self.speed as i32;
+                    }
+                }
+    
+                if next_position.1 != self.column {
+                    if next_position.1 > self.column {
+                        self.column += self.speed as i32;
+                    } else {
+                        self.column -= self.speed as i32;
+                    }
+                }
+            }
+        }
+    }
+    
     pub fn change_direction(&mut self) {
         self.level_speed = 0;
         // Commencer à déplacer la voiture horizontalement (vers la droite)
@@ -186,12 +135,12 @@ fn north_spawn(destination: &Destinations) -> (i32, i32) {
 }
 fn south_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::West {
-        return (ROW - 1, 11);
+        return (ROW, 11);
     }
     if *destination == Destinations::North {
-        return (ROW - 1, 12);
+        return (ROW, 12);
     }
-    (ROW - 1, 13)
+    (ROW, 13)
 }
 fn west_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::North {
@@ -204,12 +153,12 @@ fn west_spawn(destination: &Destinations) -> (i32, i32) {
 }
 fn east_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::North {
-        return (8, COLUMN - 1);
+        return (8, COLUMN);
     }
     if *destination == Destinations::West {
-        return (9, COLUMN - 1);
+        return (9, COLUMN);
     }
-    (10, COLUMN - 1)
+    (10, COLUMN)
 }
 pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
     let mut collisions = Vec::new();

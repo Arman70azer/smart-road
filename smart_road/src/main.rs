@@ -73,9 +73,7 @@ fn main() {
                                     }
                                     _ => {}
                                 }
-        
-                                // Mettez à jour last_action_time pour refléter l'action périodique
-                                println!("One second has passed. Performing periodic action.");
+
                                 last_action_time = Instant::now();
                             }
                         }

@@ -3,6 +3,7 @@ use crate::matrix::{
     COLUMN, ROW,
 };
 mod sub_mod_path;
+pub mod sub_mod_cars;
 use sub_mod_path::{east_destination, west_destination, north_destinations, south_destinations};
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
@@ -160,57 +161,11 @@ fn east_spawn(destination: &Destinations) -> (i32, i32) {
     }
     (10, COLUMN)
 }
-pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
-    let mut collisions = Vec::new();
-    
-    for i in 0..cars.len() {
-        for j in i + 1..cars.len() {
-            let car_a = &cars[i];
-            let car_b = &cars[j];
-            
-            // Définir les rectangles de collision
-            let rect_a = (
-                car_a.column,
-                car_a.row,
-                car_a.size,
-                car_a.size,
-            );
-            let rect_b = (
-                car_b.column,
-                car_b.row,
-                car_b.size,
-                car_b.size,
-            );
-            
-            // Vérifier le chevauchement des rectangles
-            if rect_a.0 < rect_b.0 + (rect_b.2 as i32)
-                && rect_a.0 + (rect_a.2 as i32) > rect_b.0
-                && rect_a.1 < rect_b.1 + (rect_b.3 as i32)
-                && rect_a.1 + (rect_a.3 as i32) > rect_b.1
-            {
-                collisions.push((i, j));
-            }
-        }
-    }
-    
-    collisions
-}
+
 pub fn update_cars(cars: &mut [Car]) {
     for car in cars.iter_mut() {
         if car.level_speed > 0 {
             car.update_position();
-        }
-    }
-}
-pub fn handle_collisions(cars: &mut [Car], collisions: Vec<(usize, usize)>) {
-    let mut slow_down_cars = std::collections::HashSet::new();
-    for (i, j) in collisions {
-        slow_down_cars.insert(i);
-        slow_down_cars.insert(j);
-    }
-    for car_index in slow_down_cars {
-        if let Some(car) = cars.get_mut(car_index) {
-            car.level_speed = 0; // Ralentir la voiture
         }
     }
 }

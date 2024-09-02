@@ -1,7 +1,7 @@
 extern crate sdl2;
 use std::time::{Duration, Instant};
 use smart_road::matrix::{matrix_and_canva, ROW, COLUMN};
-use smart_road::cars::{Car, Destinations, detect_collisions, handle_collisions, update_cars};
+use smart_road::cars::{Destinations, sub_mod_cars::Cars};
 use sdl2::image::InitFlag;
 use sdl2::pixels::Color;
 use smart_road::utils::random_spawn;
@@ -31,7 +31,7 @@ fn main() {
     let cell_size = cell_size_width.min(cell_size_height);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut cars: Vec<Car> = Vec::new();
+    let mut cars = Cars::new();
     let mut last_action_time = Instant::now();
 
     'running: loop {
@@ -43,19 +43,19 @@ fn main() {
                     match keycode {
                         Some(sdl2::keyboard::Keycode::Escape) => break 'running,
                         Some(sdl2::keyboard::Keycode::Down) => {
-                            smart_road::utils::random_cars(Destinations::North, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            smart_road::utils::random_cars(Destinations::North, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
                         }
                         Some(sdl2::keyboard::Keycode::Up) => {
-                            smart_road::utils::random_cars(Destinations::South, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            smart_road::utils::random_cars(Destinations::South, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
                         }
                         Some(sdl2::keyboard::Keycode::Left) => {
-                            smart_road::utils::random_cars(Destinations::East, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            smart_road::utils::random_cars(Destinations::East, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
                         }
                         Some(sdl2::keyboard::Keycode::Right) => {
-                            smart_road::utils::random_cars(Destinations::West, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            smart_road::utils::random_cars(Destinations::West, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
                         }
                         Some(sdl2::keyboard::Keycode::R)=>{
-                            smart_road::utils::random_cars(random_spawn(), &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                            smart_road::utils::random_cars(random_spawn(), &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
                         }
                         _ => {}
                     }
@@ -75,22 +75,16 @@ fn main() {
 
         
 
-        let collisions = detect_collisions(&mut cars);
-        handle_collisions(&mut cars, collisions);
-        update_cars(&mut cars);
-        cars.retain(|car| {
-            car.column >= 0
-                && car.column <= WIDTH
-                && car.row >= 0
-                && car.row <= HEIGHT
-        });
+        cars.handle_collisions();
+        cars.update_cars();
+        cars.retain(HEIGHT, WIDTH);
 
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
         matrix_and_canva(&mut canvas, HEIGHT, WIDTH);
 
         canvas.set_draw_color(Color::RGB(255, 0, 0));
-        for car in &cars {
+        for car in &cars.cars {
             car.draw(&mut canvas);
         }
 

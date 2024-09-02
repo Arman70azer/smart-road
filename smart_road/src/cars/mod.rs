@@ -293,6 +293,9 @@ pub fn handle_collisions(cars: &mut [Car], collisions: Vec<(usize, usize)>) {
     for car_index in slow_down_cars {
         if let Some(car) = cars.get_mut(car_index) {
             car.level_speed = 2; // Ralentir la voiture
-        }
+        } 
+        // else {
+             
+        // }
     }
 }

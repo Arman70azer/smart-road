@@ -91,4 +91,6 @@ fn main() {
         }
 
         canvas.present();
-        std
+        std::thread::sleep(Duration::from_millis(16));
+    }
+}

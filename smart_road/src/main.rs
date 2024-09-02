@@ -1,7 +1,8 @@
-extern crate sdl2;
 use std::time::{Duration, Instant};
 use smart_road::matrix::{matrix_and_canva, ROW, COLUMN};
 use smart_road::cars::{Destinations, sub_mod_cars::Cars};
+use smart_road::statistics::{init_font, display_stats};
+
 use sdl2::image::InitFlag;
 use sdl2::pixels::Color;
 use smart_road::utils::random_spawn;
@@ -33,46 +34,57 @@ fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut cars = Cars::new();
     let mut last_action_time = Instant::now();
+    let ttf_context = sdl2::ttf::init().expect("Failed to initialize TTF context");
+    let font = init_font(&ttf_context);
+    let mut see_tab=false;
 
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
                 sdl2::event::Event::Quit { .. } => break 'running,
+        
                 sdl2::event::Event::KeyDown { keycode, .. } => {
-                    if last_action_time.elapsed() >= ACTION_INTERVAL {
                     match keycode {
                         Some(sdl2::keyboard::Keycode::Escape) => break 'running,
-                        Some(sdl2::keyboard::Keycode::Down) => {
-                            smart_road::utils::random_cars(Destinations::North, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
+        
+                        Some(sdl2::keyboard::Keycode::S) => {
+                            see_tab = !see_tab;
+                            last_action_time = Instant::now();
                         }
-                        Some(sdl2::keyboard::Keycode::Up) => {
-                            smart_road::utils::random_cars(Destinations::South, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
+        
+                        _ => {
+                            // Vérifiez le délai d'action pour les autres touches
+                            if last_action_time.elapsed() >= ACTION_INTERVAL && !see_tab {
+                                match keycode {
+                                    Some(sdl2::keyboard::Keycode::Down) => {
+                                        smart_road::utils::random_cars(Destinations::North, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
+                                    }
+                                    Some(sdl2::keyboard::Keycode::Up) => {
+                                        smart_road::utils::random_cars(Destinations::South, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
+                                    }
+                                    Some(sdl2::keyboard::Keycode::Left) => {
+                                        smart_road::utils::random_cars(Destinations::East, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
+                                    }
+                                    Some(sdl2::keyboard::Keycode::Right) => {
+                                        smart_road::utils::random_cars(Destinations::West, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
+                                    }
+                                    Some(sdl2::keyboard::Keycode::R) => {
+                                        smart_road::utils::random_cars(random_spawn(), &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
+                                    }
+                                    _ => {}
+                                }
+        
+                                // Mettez à jour last_action_time pour refléter l'action périodique
+                                println!("One second has passed. Performing periodic action.");
+                                last_action_time = Instant::now();
+                            }
                         }
-                        Some(sdl2::keyboard::Keycode::Left) => {
-                            smart_road::utils::random_cars(Destinations::East, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
-                        }
-                        Some(sdl2::keyboard::Keycode::Right) => {
-                            smart_road::utils::random_cars(Destinations::West, &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
-                        }
-                        Some(sdl2::keyboard::Keycode::R)=>{
-                            smart_road::utils::random_cars(random_spawn(), &texture_creator, SQUARE_SPEED, cell_size, &mut cars.cars);
-                        }
-                        _ => {}
                     }
-                    // Check if the interval has elapsed and perform the action
-    
-        // Perform the periodic action here
-        // For example, you might want to print something or update some state
-        println!("One second has passed. Performing periodic action.");
-
-        // Update the last action time
-        last_action_time = Instant::now();
-    }
                 }
+        
                 _ => {}
             }
-        }
-
+        }        
         
 
         cars.handle_collisions();
@@ -86,6 +98,10 @@ fn main() {
         canvas.set_draw_color(Color::RGB(255, 0, 0));
         for car in &cars.cars {
             car.draw(&mut canvas);
+        }
+
+        if see_tab && cars.cars.len()==0 {
+            display_stats(&mut canvas, &font, &texture_creator, &cars);
         }
 
         canvas.present();

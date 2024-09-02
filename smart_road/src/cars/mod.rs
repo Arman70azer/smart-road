@@ -66,14 +66,14 @@ impl<'a> Car<'a> {
             Destinations::South => Textures::GreenCar,
         };
         let texture = Texture::new(texture_creator, &texture_type);
-        //ICI il faut créer les fn destinations pour qu'il renvoie un Vec avec à l'intérieur les positions de
-        //toutes les cases sur lesquelles la voiture devra ce rendre pour arriver à destination.
+        
         let path = match destination {
             Destinations::South => south_destinations(row, column, size),
             Destinations::North => north_destinations(row, column, size),
             Destinations::East => east_destination(row, column, size),
             Destinations::West => west_destination(row, column, size),
         };
+        
         let sizy = (size as f64 * 0.9) as u32;
         Car {
             row,
@@ -115,11 +115,6 @@ impl<'a> Car<'a> {
         }
     }
     
-    pub fn change_direction(&mut self) {
-        self.level_speed = 0;
-        // Commencer à déplacer la voiture horizontalement (vers la droite)
-        self.level_speed = 1;
-    }
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
         self.texture
             .apply_texture(canvas, self.column, self.row, self.size)

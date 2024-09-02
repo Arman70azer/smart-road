@@ -2,3 +2,4 @@
 pub mod matrix;
 pub mod utils;
 pub mod cars;
+pub mod statistics;

@@ -2,12 +2,18 @@ use crate::cars::Car;
 
 pub struct Cars<'a> {
     pub cars: Vec<Car<'a>>,
+    pub collisions: i16,
+    pub cars_passed: i16,
+    pub close_calls: i16,
 }
 
 impl <'a>Cars<'a> {
     pub fn new() -> Self {
         Cars {
             cars: Vec::new(),
+            collisions: 0,
+            cars_passed: 0,
+            close_calls:0,
         }
     }
 
@@ -34,7 +40,7 @@ impl <'a>Cars<'a> {
         }
     }
 
-    pub fn num_of_accidents(&self)->i16{
+    pub fn collision(&self)->i16{
         let mut count = 0;
         for car in &self.cars{
             count+= car.choc;
@@ -43,12 +49,18 @@ impl <'a>Cars<'a> {
     }
 
     pub fn retain(&mut self, heigth: i32, width: i32 ){
+        let before = self.cars.len();
         self.cars.retain(|car| {
             car.column >= 0
                 && car.column <= width
                 && car.row >= 0
                 && car.row <= heigth
         });
+        let after = self.cars.len();
+
+        if before > after {
+            self.cars_passed+= (before-after) as i16;
+        }
     }
 
 }

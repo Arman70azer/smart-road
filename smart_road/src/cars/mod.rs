@@ -5,6 +5,8 @@ use crate::matrix::{
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use std::fmt;
+// use std::f32::consts::PI;
+
 #[derive(PartialEq, Clone, Copy)]
 pub enum Destinations {
     North,
@@ -12,6 +14,22 @@ pub enum Destinations {
     East,
     West,
 }
+
+impl Destinations {
+    pub fn to_degrees(&self) -> f32 {
+        match self {
+            Destinations::North => 0.0,
+            Destinations::East => 90.0,
+            Destinations::South => 180.0,
+            Destinations::West => 270.0,
+        }
+    }
+
+    pub fn to_radians(&self) -> f32 {
+        self.to_degrees().to_radians()
+    }
+}
+
 pub struct Car<'a> {
     pub row: i32,
     pub column: i32,
@@ -23,8 +41,9 @@ pub struct Car<'a> {
     pub size: u32,
     pub choc: i16,
     pub destination: Destinations,
-    //Penser à mettre un temps,
+    pub collision_extension: i32,
 }
+
 impl<'a> fmt::Debug for Car<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Car")
@@ -38,6 +57,7 @@ impl<'a> fmt::Debug for Car<'a> {
             .finish()
     }
 }
+
 impl<'a> Car<'a> {
     pub fn new(
         spawn: Destinations,
@@ -54,7 +74,7 @@ impl<'a> Car<'a> {
         };
         let row = position.0 * size as i32;
         let column = position.1 * size as i32;
-        println!("Position: ({}, {}), Size: {}", position.0, position.1, size);
+        // println!("Position: ({}, {}), Size: {}", position.0, position.1, size);
         let texture_type: Textures = match destination {
             Destinations::East => Textures::BlackCar,
             Destinations::West => Textures::OrangeCar,
@@ -62,31 +82,22 @@ impl<'a> Car<'a> {
             Destinations::South => Textures::GreenCar,
         };
         let texture = Texture::new(texture_creator, &texture_type);
-        //ICI il faut créer les fn destinations pour qu'il renvoie un Vec avec à l'intérieur les positions de
-        //toutes les cases sur lesquelles la voiture devra ce rendre pour arriver à destination.
-        // let path = match destination {
-        //     Destinations::South => south_destinations(positions),
-        //     Destinations::North => north_destinations(positions),
-        //     Destinations::East => east_destinations(positions),
-        //     Destinations::West => west_destinations(positions),
-        // };
         let sizy = (size as f64 * 0.9) as u32;
         Car {
             row,
             column,
             texture,
-            path: vec![(row, column)], /*remplacer avec juste path */
+            path: vec![(row, column)],
             position,
-            level_speed: 1,
+            level_speed: 4,
             speed,
             size: sizy,
             choc: 0,
             destination,
+            collision_extension: 50,
         }
     }
-    //Ici Il faut de préfèrence finir d'apporter le path à la voiture avant de commencer
-    //la voiture devra ce déplacer à l'étape suivante en utilsant comme réfèrence la car.position et en cherchant l'étape suivante dans car.path
-    // Déplacer la voiture en fonction de sa vitesse et direction actuelle
+
     pub fn update_position(&mut self) {
         match self.destination {
             Destinations::East => {
@@ -147,7 +158,7 @@ impl<'a> Car<'a> {
                 if self.position.0 < 288 {
                     self.row += (self.speed as i32) * self.level_speed;
                     self.position = (self.row, self.column);
-                    println!("lalala");
+                    // println!("lalala");
                 } else if self.position.0 == 288 && self.column >= 360 {
                     self.change_direction();
                     self.column += (self.speed as i32) * self.level_speed;
@@ -163,21 +174,21 @@ impl<'a> Car<'a> {
                 }
             }
         }
-        println!("{:?}", self);
-    }
-    
 
-    // Définir change_direction comme une méthode d'instance de Car
+        // println!("{:?}", self);
+    }
+
     pub fn change_direction(&mut self) {
         self.level_speed = 0;
-        // Commencer à déplacer la voiture horizontalement (vers la droite)
-        self.level_speed = 1;
+        self.level_speed = 4;
     }
+
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
         self.texture
             .apply_texture(canvas, self.column, self.row, self.size)
     }
 }
+
 fn north_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::West {
         return (0, 8);
@@ -187,15 +198,17 @@ fn north_spawn(destination: &Destinations) -> (i32, i32) {
     }
     (0, 10)
 }
+
 fn south_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::West {
-        return (ROW - 1, 11);
+        return (ROW, 11);
     }
     if *destination == Destinations::North {
-        return (ROW - 1, 12);
+        return (ROW, 12);
     }
-    (ROW - 1, 13)
+    (ROW, 13)
 }
+
 fn west_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::North {
         return (11, 0);
@@ -205,14 +218,15 @@ fn west_spawn(destination: &Destinations) -> (i32, i32) {
     }
     (13, 0)
 }
+
 fn east_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::North {
-        return (8, COLUMN - 1);
+        return (8, COLUMN);
     }
     if *destination == Destinations::West {
-        return (9, COLUMN - 1);
+        return (9, COLUMN);
     }
-    (10, COLUMN - 1)
+    (10, COLUMN)
 }
 
 pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
@@ -223,18 +237,10 @@ pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
             let car_a = &cars[i];
             let car_b = &cars[j];
             
-            // Définir les rectangles de collision
-            let rect_a = (
-                car_a.column,
-                car_a.row,
-                car_a.size,
-                car_a.size,
-            );
-            let rect_b = (
-                car_b.column,
-                car_b.row,
-                car_b.size,
-                car_b.size,
+            // Définir les rectangles de collision avec l'extension vers l'avant
+            let (rect_a, rect_b) = (
+                expand_collision_rect(car_a),
+                expand_collision_rect(car_b),
             );
             
             // Vérifier le chevauchement des rectangles
@@ -249,6 +255,23 @@ pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
     }
     
     collisions
+}
+
+fn expand_collision_rect(car: &Car) -> (i32, i32, i32, i32) {
+    let radians = car.destination.to_radians();
+    let dx = (radians.cos() * car.collision_extension as f32) as i32;
+    let dy = (radians.sin() * car.collision_extension as f32) as i32;
+
+    // Calculer l'extension de collision en fonction de la direction
+    let extension_x = dx;
+    let extension_y = dy;
+    
+    (
+        car.column - (car.size as i32 / 2) + extension_x,
+        car.row - (car.size as i32 / 2) + extension_y,
+        car.size as i32 + car.collision_extension as i32,
+        car.size as i32 + car.collision_extension as i32,
+    )
 }
 
 pub fn update_cars(cars: &mut [Car]) {
@@ -269,7 +292,7 @@ pub fn handle_collisions(cars: &mut [Car], collisions: Vec<(usize, usize)>) {
 
     for car_index in slow_down_cars {
         if let Some(car) = cars.get_mut(car_index) {
-            car.level_speed = 0; // Ralentir la voiture
+            car.level_speed = 2; // Ralentir la voiture
         }
     }
 }

@@ -4,11 +4,12 @@ use smart_road::matrix::{matrix_and_canva, ROW, COLUMN};
 use smart_road::cars::{Car, Destinations, detect_collisions, handle_collisions, update_cars};
 use sdl2::image::InitFlag;
 use sdl2::pixels::Color;
+use smart_road::utils::random_spawn;
 
 const WIDTH: i32 = 800;
 const HEIGHT: i32 = 800;
 const SQUARE_SPEED: i32 = 1;
-const ACTION_INTERVAL: Duration = Duration::from_secs(2);
+const ACTION_INTERVAL: Duration = Duration::from_millis(500);
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -53,13 +54,12 @@ fn main() {
                         Some(sdl2::keyboard::Keycode::Right) => {
                             smart_road::utils::random_cars(Destinations::West, &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
                         }
+                        Some(sdl2::keyboard::Keycode::R)=>{
+                            smart_road::utils::random_cars(random_spawn(), &texture_creator, SQUARE_SPEED, cell_size, &mut cars);
+                        }
                         _ => {}
                     }
-                    // Check if the interval has elapsed and perform the action
-    
-        // Perform the periodic action here
-        // For example, you might want to print something or update some state
-        println!("One second has passed. Performing periodic action.");
+        // println!("One second has passed. Performing periodic action.");
 
         // Update the last action time
         last_action_time = Instant::now();

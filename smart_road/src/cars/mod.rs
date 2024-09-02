@@ -7,7 +7,7 @@ pub mod sub_mod_cars;
 use sub_mod_path::{east_destination, west_destination, north_destinations, south_destinations};
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
-use std::fmt;
+use std::{fmt, time::{Instant,Duration}};
 #[derive(PartialEq, Clone, Copy)]
 pub enum Destinations {
     North,
@@ -15,6 +15,7 @@ pub enum Destinations {
     East,
     West,
 }
+
 pub struct Car<'a> {
     pub row: i32,
     pub column: i32,
@@ -27,7 +28,8 @@ pub struct Car<'a> {
     pub path: Vec<(i32, i32)>,
     pub destination: Destinations,
     pub index_path: u8,
-    //Penser à mettre un temps,
+    pub last_update: Instant, 
+    pub timer: Duration,
 }
 impl<'a> fmt::Debug for Car<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -87,6 +89,8 @@ impl<'a> Car<'a> {
             choc: 0,
             destination,
             index_path: 0,
+            last_update: Instant::now(),
+            timer: Duration::new(0, 0),
         }
     }
     
@@ -155,12 +159,4 @@ fn east_spawn(destination: &Destinations) -> (i32, i32) {
         return (9, COLUMN);
     }
     (10, COLUMN)
-}
-
-pub fn update_cars(cars: &mut [Car]) {
-    for car in cars.iter_mut() {
-        if car.level_speed > 0 {
-            car.update_position();
-        }
-    }
 }

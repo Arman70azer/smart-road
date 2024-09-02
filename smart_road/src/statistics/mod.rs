@@ -13,7 +13,7 @@ pub fn display_stats(
     canvas: &mut sdl2::render::Canvas<sdl2::video::Window>,
     font: &Font,
     texture_creator: &sdl2::render::TextureCreator<sdl2::video::WindowContext>,
-    _cars: &Cars,// Quand nous aurons la logique des level_speed
+    cars: &Cars,// Quand nous aurons la logique des level_speed
 ) {
 
     let stats = vec![
@@ -21,8 +21,8 @@ pub fn display_stats(
         format!("Cars Passed: {}", 1),
         format!("Max velocity: {}", 1),
         format!("Min velocity: {}", 1),
-        format!("Max Time: {}", 2),
-        format!("Min Time: {}", 3),
+        format!("Max Time: {:?}", cars.max_time),
+        format!("Min Time: {:?}", cars.min_time),
         format!("Close Calls: {}", 3),
     ];
 

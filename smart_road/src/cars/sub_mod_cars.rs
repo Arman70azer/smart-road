@@ -1,9 +1,12 @@
 use crate::cars::Car;
+use std::time::{Instant, Duration};
 
 pub struct Cars<'a> {
     pub cars: Vec<Car<'a>>,
     pub collisions: i16,
     pub cars_passed: i16,
+    pub max_time: Duration,
+    pub min_time: Duration,
     pub close_calls: i16,
 }
 
@@ -14,6 +17,8 @@ impl <'a>Cars<'a> {
             collisions: 0,
             cars_passed: 0,
             close_calls:0,
+            max_time: Duration::new(0, 0),
+            min_time: Duration::new(100, 0)
         }
     }
 
@@ -37,6 +42,9 @@ impl <'a>Cars<'a> {
             if car.level_speed > 0 {
                 car.update_position();
             }
+            let now = Instant::now();
+            car.timer += now.duration_since(car.last_update);
+            car.last_update = now;
         }
     }
 
@@ -49,6 +57,9 @@ impl <'a>Cars<'a> {
     }
 
     pub fn retain(&mut self, heigth: i32, width: i32 ){
+        
+        self.update_timer(width, heigth);
+
         let before = self.cars.len();
         self.cars.retain(|car| {
             car.column >= 0
@@ -60,6 +71,28 @@ impl <'a>Cars<'a> {
 
         if before > after {
             self.cars_passed+= (before-after) as i16;
+        }
+    }
+
+    fn update_timer(&mut self, width: i32, heigth: i32){
+       
+        let mut cars_to_remove = Vec::new();
+        for car in &self.cars {
+            if car.column < 0 || car.column > width || car.row < 0 || car.row > heigth {
+                cars_to_remove.push(car);
+            }
+        }
+
+        for car in cars_to_remove {
+            if car.timer > self.max_time {
+                let rounded_seconds = round_to_three_decimal_places(car.timer.as_secs_f64());
+                self.max_time = Duration::from_secs_f64(rounded_seconds);
+            }
+
+            if car.timer < self.min_time || self.min_time == Duration::new(u64::MAX, 999_999_999) {
+                let rounded_seconds = round_to_three_decimal_places(car.timer.as_secs_f64());
+                self.min_time = Duration::from_secs_f64(rounded_seconds);
+            }
         }
     }
 
@@ -100,4 +133,8 @@ fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
     }
     
     collisions
+}
+
+fn round_to_three_decimal_places(value: f64) -> f64 {
+    (value * 1000.0).round() / 1000.0
 }

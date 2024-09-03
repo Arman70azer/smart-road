@@ -55,7 +55,7 @@ impl <'a>Cars<'a> {
                     let column_diff = (other_car.column as i32 - car.column as i32).abs();
                     
                     //TODO Changer la condition other_car.level_speed
-                    if row_diff <= car.size && column_diff <= car.collision_extension_midlle{
+                    if row_diff <= car.size && column_diff <= car.collision_extension_midlle && car.index_path> other_car.index_path{
                         level_speed = 0; // Arrêt complet si trop proche
                         break;
                     }
@@ -68,7 +68,7 @@ impl <'a>Cars<'a> {
                     let column_diff = (other_car.column as i32).abs_diff(car.column as i32);
                     let row_diff = (other_car.row as i32 - car.row as i32).abs();
                     
-                    if column_diff <= car.size && row_diff <= car.collision_extension_midlle  {
+                    if column_diff <= car.size && row_diff <= car.collision_extension_midlle && car.index_path> other_car.index_path  {
                         level_speed = 0; // Arrêt complet si trop proche
                         break;
                     }

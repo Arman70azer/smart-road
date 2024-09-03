@@ -292,4 +292,54 @@ fn rectangles_overlap(rect1: (i32, i32, i32, i32), rect2: (i32, i32, i32, i32)) 
 fn expand_collision_rect(car: &Car) -> ((i32, i32, i32, i32), (i32, i32, i32, i32)) {
     let radians = car.destination.to_radians();
     let dmx = (radians.cos() * car.collision_extension_middle as f32) as i32;
-    l
+    let dmy = (radians.sin() * car.collision_extension_middle as f32) as i32;
+    let dlx = (radians.cos() * car.collision_extension_low as f32) as i32;
+    let dly = (radians.sin() * car.collision_extension_low as f32) as i32;
+
+    (
+        (
+            car.column - (car.size as i32 * 2) + dmx,
+            car.row - (car.size as i32 * 2) + dmy,
+            car.size as i32 + car.collision_extension_middle as i32,
+            car.size as i32 + car.collision_extension_middle as i32,
+        ),
+        (
+            car.column - (car.size as i32 * 2) - dlx,
+            car.row - (car.size as i32 * 2) - dly,
+            car.size as i32 + car.collision_extension_low as i32,
+            car.size as i32 + car.collision_extension_low as i32,
+        ),
+    )
+}
+
+pub fn update_cars(cars: &mut [Car]) {
+    for car in cars.iter_mut() {
+        if car.level_speed > 0 {
+            car.update_position();
+        }
+    }
+}
+
+pub fn handle_collisions(cars: &mut [Car], collisions: Vec<(usize, usize, &str)>) {
+    let mut slow_down_cars = std::collections::HashSet::new();
+
+    for (i, j, zone) in collisions {
+        match zone {
+            "middle" => {
+                slow_down_cars.insert(i);
+                slow_down_cars.insert(j);
+            }
+            "low" => {
+                slow_down_cars.insert(i);
+                slow_down_cars.insert(j);
+            }
+            _ => {}
+        }
+    }
+
+    for car_index in slow_down_cars {
+        if let Some(car) = cars.get_mut(car_index) {
+            car.adjust_speed(0.8); // Réduire la vitesse progressivement
+        }
+    }
+}

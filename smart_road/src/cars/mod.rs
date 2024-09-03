@@ -44,7 +44,7 @@ pub struct Car<'a> {
     pub choc: i16,
     pub path: Vec<(i32, i32)>,
     pub destination: Destinations,
-    pub index_path: u8,
+    pub index_path: usize,
     pub last_update: Instant, 
     pub timer: Duration,
     pub collision_extension_midlle: i32,
@@ -79,7 +79,7 @@ impl<'a> Car<'a> {
         };
         let row = position.0 * size as i32;
         let column = position.1 * size as i32;
-        println!("Position: ({}, {}), Size: {}", position.0, position.1, size);
+    
         let texture_type: Textures = match destination {
             Destinations::East => Textures::BlackCar,
             Destinations::West => Textures::OrangeCar,
@@ -95,6 +95,7 @@ impl<'a> Car<'a> {
             Destinations::West => west_destination(row, column, size),
         };
         
+        println!("path: {}", path.len());
         let sizy = (size as f64 * 0.9) as u32;
         Car {
             row,
@@ -116,28 +117,46 @@ impl<'a> Car<'a> {
     }
     
     pub fn update_position(&mut self) {
+
         if let Some(next_position) = self.path.get(self.index_path as usize + 1) {
-            if next_position.0 == self.row && next_position.1 == self.column {
-                self.position = (self.row, self.column);
-                self.index_path += 1;
-            } else {
-                if next_position.0 != self.row {
-                    if next_position.0 > self.row {
-                        self.row += self.speed as i32;
-                        self.destination = Destinations::South;
-                    } else {
-                        self.row -= self.speed as i32;
-                        self.destination = Destinations::North;
+            if next_position.0 != self.row {
+                if next_position.0 > self.row {
+                    self.row += (self.speed as i32) * self.level_speed;
+                    self.destination = Destinations::South;
+
+                    if self.row >= next_position.0{
+                        self.position = (self.row, self.column);
+                        self.index_path += 1;
+                    }
+
+                } else {
+                    self.row -= (self.speed as i32) * self.level_speed;
+                    self.destination = Destinations::North;
+
+                    if self.row <= next_position.0{
+                        self.position = (self.row, self.column);
+                        self.index_path += 1;
                     }
                 }
-    
-                if next_position.1 != self.column {
-                    if next_position.1 > self.column {
-                        self.column += self.speed as i32;
-                        self.destination = Destinations::East;
-                    } else {
-                        self.column -= self.speed as i32;
-                        self.destination = Destinations::West;
+            }
+
+            if next_position.1 != self.column {
+                if next_position.1 > self.column {
+                    self.column += (self.speed as i32) * self.level_speed;
+                    self.destination = Destinations::East;
+
+                    if self.column >= next_position.1{
+                        self.position = (self.row, self.column);
+                        self.index_path += 1;
+
+                    }
+                } else {
+                    self.column -= (self.speed as i32) * self.level_speed;
+                    self.destination = Destinations::West;
+
+                    if self.column <= next_position.1{
+                        self.position = (self.row, self.column);
+                        self.index_path += 1;
                     }
                 }
             }

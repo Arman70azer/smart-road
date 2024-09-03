@@ -10,7 +10,7 @@ use smart_road::utils::random_spawn;
 const WIDTH: i32 = 800;
 const HEIGHT: i32 = 800;
 const SQUARE_SPEED: i32 = 1;
-const ACTION_INTERVAL: Duration = Duration::from_millis(700);
+const ACTION_INTERVAL: Duration = Duration::from_millis(500);
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();

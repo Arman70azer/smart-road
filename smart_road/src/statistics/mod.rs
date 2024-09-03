@@ -23,7 +23,7 @@ pub fn display_stats(
         format!("Min velocity: {}px/s", cars.min_velocity),
         format!("Max Time: {:?}", cars.max_time),
         format!("Min Time: {:?}", cars.min_time),
-        format!("Collisions: {}", cars.collision()),
+        format!("Collisions: {}", cars.collisions),
         format!("Close Calls: {}", 3),
     ];
 

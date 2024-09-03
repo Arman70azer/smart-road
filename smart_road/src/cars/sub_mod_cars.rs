@@ -64,14 +64,6 @@ impl <'a>Cars<'a> {
         }
     }
 
-    pub fn collision(&self)->i16{
-        let mut count = 0;
-        for car in &self.cars{
-            count+= car.choc;
-        }
-        count/2
-    }
-
     pub fn retain(&mut self, heigth: i32, width: i32 ){
         
         self.update_timer_and_velocity(width, heigth);

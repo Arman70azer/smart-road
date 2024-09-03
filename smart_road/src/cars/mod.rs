@@ -41,7 +41,8 @@ pub struct Car<'a> {
     pub size: u32,
     pub choc: i16,
     pub destination: Destinations,
-    pub collision_extension: i32,
+    pub collision_extension_midlle: i32,
+    pub collision_extension_low: i32,
 }
 
 impl<'a> fmt::Debug for Car<'a> {
@@ -94,7 +95,8 @@ impl<'a> Car<'a> {
             size: sizy,
             choc: 0,
             destination,
-            collision_extension: 50,
+            collision_extension_midlle: 50,
+            collision_extension_low: 10,
         }
     }
 
@@ -201,12 +203,12 @@ fn north_spawn(destination: &Destinations) -> (i32, i32) {
 
 fn south_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::West {
-        return (ROW, 11);
+        return (ROW -1, 11);
     }
     if *destination == Destinations::North {
-        return (ROW, 12);
+        return (ROW -1, 12);
     }
-    (ROW, 13)
+    (ROW -1, 13)
 }
 
 fn west_spawn(destination: &Destinations) -> (i32, i32) {
@@ -221,15 +223,15 @@ fn west_spawn(destination: &Destinations) -> (i32, i32) {
 
 fn east_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::North {
-        return (8, COLUMN);
+        return (8, COLUMN -1);
     }
     if *destination == Destinations::West {
-        return (9, COLUMN);
+        return (9, COLUMN -1);
     }
-    (10, COLUMN)
+    (10, COLUMN -1)
 }
 
-pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
+pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize, &'static str)> {
     let mut collisions = Vec::new();
     
     for i in 0..cars.len() {
@@ -237,41 +239,58 @@ pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
             let car_a = &cars[i];
             let car_b = &cars[j];
             
-            // Définir les rectangles de collision avec l'extension vers l'avant
-            let (rect_a, rect_b) = (
-                expand_collision_rect(car_a),
-                expand_collision_rect(car_b),
-            );
+            // Obtenez les deux paires de rectangles de collision
+            let (rect_a_middle, rect_a_low) = expand_collision_rect(car_a);
+            let (rect_b_middle, rect_b_low) = expand_collision_rect(car_b);
             
-            // Vérifier le chevauchement des rectangles
-            if rect_a.0 < rect_b.0 + (rect_b.2 as i32)
-                && rect_a.0 + (rect_a.2 as i32) > rect_b.0
-                && rect_a.1 < rect_b.1 + (rect_b.3 as i32)
-                && rect_a.1 + (rect_a.3 as i32) > rect_b.1
-            {
-                collisions.push((i, j));
+            // Vérifiez les chevauchements pour la zone middle
+            if rectangles_overlap(rect_a_middle, rect_b_middle) {
+                collisions.push((i, j, "middle"));
+            }
+            // Vérifiez les chevauchements pour la zone low
+            else if rectangles_overlap(rect_a_low, rect_b_low) {
+                collisions.push((i, j, "low"));
             }
         }
     }
     
+    println!("collisions: {:?}", collisions);
     collisions
 }
 
-fn expand_collision_rect(car: &Car) -> (i32, i32, i32, i32) {
+fn rectangles_overlap(rect1: (i32, i32, i32, i32), rect2: (i32, i32, i32, i32)) -> bool {
+    rect1.0 < rect2.0 + rect2.2
+        && rect1.0 + rect1.2 > rect2.0
+        && rect1.1 < rect2.1 + rect2.3
+        && rect1.1 + rect1.3 > rect2.1
+}
+
+
+fn expand_collision_rect(car: &Car) -> ((i32, i32, i32, i32), (i32, i32, i32, i32)) {
     let radians = car.destination.to_radians();
-    let dx = (radians.cos() * car.collision_extension as f32) as i32;
-    let dy = (radians.sin() * car.collision_extension as f32) as i32;
+    let dmx = (radians.cos() * car.collision_extension_midlle as f32) as i32;
+    let dmy = (radians.sin() * car.collision_extension_midlle as f32) as i32;
+    let dlx = (radians.cos() * car.collision_extension_low as f32) as i32;
+    let dly = (radians.sin() * car.collision_extension_low as f32) as i32;
 
     // Calculer l'extension de collision en fonction de la direction
-    let extension_x = dx;
-    let extension_y = dy;
+    let extension_midlle_x = dmx;
+    let extension_midlle_y = dmy;
+    let extension_low_x = dlx;
+    let extension_low_y = dly;
     
+    ((
+        car.column - (car.size as i32 * 2) + extension_midlle_x,
+        car.row - (car.size as i32 * 2) + extension_midlle_y,
+        car.size as i32 + car.collision_extension_midlle as i32,
+        car.size as i32 + car.collision_extension_midlle as i32,
+    ),
     (
-        car.column - (car.size as i32 / 2) + extension_x,
-        car.row - (car.size as i32 / 2) + extension_y,
-        car.size as i32 + car.collision_extension as i32,
-        car.size as i32 + car.collision_extension as i32,
-    )
+        car.column - (car.size as i32 * 2) - extension_low_x,
+        car.row - (car.size as i32 * 2) - extension_low_y,
+        car.size as i32 + car.collision_extension_low as i32,
+        car.size as i32 + car.collision_extension_low as i32,
+    ))
 }
 
 pub fn update_cars(cars: &mut [Car]) {
@@ -282,20 +301,35 @@ pub fn update_cars(cars: &mut [Car]) {
     }
 }
 
-pub fn handle_collisions(cars: &mut [Car], collisions: Vec<(usize, usize)>) {
+pub fn handle_collisions(cars: &mut [Car], collisions: Vec<(usize, usize, &str)>) {
     let mut slow_down_cars = std::collections::HashSet::new();
+    let mut stop_cars = std::collections::HashSet::new();
 
-    for (i, j) in collisions {
-        slow_down_cars.insert(i);
-        slow_down_cars.insert(j);
+    for (i, j, zone) in collisions {
+        match zone {
+            "middle" => {
+                slow_down_cars.insert(i);
+                slow_down_cars.insert(j);
+            }
+            "low" => {
+                stop_cars.insert(i);
+                stop_cars.insert(j);
+            }
+            _ => {}
+        }
     }
 
+    // Réaction aux collisions dans la zone middle (ralentir)
     for car_index in slow_down_cars {
         if let Some(car) = cars.get_mut(car_index) {
-            car.level_speed = 2; // Ralentir la voiture
-        } 
-        // else {
-             
-        // }
+            car.level_speed = 3; // Ralentir la voiture
+        }
+    }
+
+    // Réaction aux collisions dans la zone low (arrêter)
+    for car_index in stop_cars {
+        if let Some(car) = cars.get_mut(car_index) {
+            car.level_speed = 1; // Arrêter la voiture
+        }
     }
 }

@@ -8,6 +8,7 @@ use sub_mod_path::{east_destination, west_destination, north_destinations, south
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use std::{fmt, time::{Instant,Duration}};
+mod njeanfre;
 #[derive(PartialEq, Clone, Copy)]
 pub enum Destinations {
     North,
@@ -15,6 +16,22 @@ pub enum Destinations {
     East,
     West,
 }
+
+impl Destinations {
+    pub fn to_degrees(&self) -> f32 {
+        match self {
+            Destinations::North => 0.0,
+            Destinations::East => 90.0,
+            Destinations::South => 180.0,
+            Destinations::West => 270.0,
+        }
+    }
+
+    pub fn to_radians(&self) -> f32 {
+        self.to_degrees().to_radians()
+    }
+}
+
 
 pub struct Car<'a> {
     pub row: i32,
@@ -30,6 +47,8 @@ pub struct Car<'a> {
     pub index_path: u8,
     pub last_update: Instant, 
     pub timer: Duration,
+    pub collision_extension_midlle: i32,
+    pub collision_extension_low: i32,
 }
 impl<'a> fmt::Debug for Car<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -91,6 +110,8 @@ impl<'a> Car<'a> {
             index_path: 0,
             last_update: Instant::now(),
             timer: Duration::new(0, 0),
+            collision_extension_midlle: 50,
+            collision_extension_low: 10,
         }
     }
     
@@ -103,16 +124,20 @@ impl<'a> Car<'a> {
                 if next_position.0 != self.row {
                     if next_position.0 > self.row {
                         self.row += self.speed as i32;
+                        self.destination = Destinations::South;
                     } else {
                         self.row -= self.speed as i32;
+                        self.destination = Destinations::North;
                     }
                 }
     
                 if next_position.1 != self.column {
                     if next_position.1 > self.column {
                         self.column += self.speed as i32;
+                        self.destination = Destinations::East;
                     } else {
                         self.column -= self.speed as i32;
+                        self.destination = Destinations::West;
                     }
                 }
             }
@@ -120,8 +145,9 @@ impl<'a> Car<'a> {
     }
     
     pub fn draw(&self, canvas: &mut Canvas<Window>) {
+        let rotation = self.destination.to_degrees() as f64;
         self.texture
-            .apply_texture(canvas, self.column, self.row, self.size)
+            .apply_texture_with_rotation(canvas, self.column, self.row, self.size, rotation)
     }
 }
 fn north_spawn(destination: &Destinations) -> (i32, i32) {

@@ -1,6 +1,6 @@
-use sdl2::render::{Texture as SdlTexture, TextureCreator};
+use sdl2::render::{Texture as SdlTexture, TextureCreator, Canvas};
 use sdl2::video::WindowContext;
-use sdl2::rect::Rect;
+use sdl2::rect::{Rect, Point};
 use sdl2::image::LoadTexture;
 use std::fmt;
 
@@ -49,6 +49,12 @@ impl<'a> Texture<'a> {
     pub fn apply_texture(&self, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, x: i32, y: i32, cell_size: u32) {
         let dest_rect = Rect::new(x as i32, y as i32, cell_size, cell_size);
         canvas.copy(&self.texture, None, Some(dest_rect)).unwrap();
+    }
+
+    pub fn apply_texture_with_rotation(&self, canvas: &mut Canvas<sdl2::video::Window>, x: i32, y: i32, cell_size: u32, rotation: f64) {
+        let dest_rect = Rect::new(x, y, cell_size, cell_size);
+        let center = Some(Point::new(cell_size as i32 / 2, cell_size as i32 / 2));
+        canvas.copy_ex(&self.texture, None, Some(dest_rect), rotation, center, false, false).unwrap();
     }
 }
 

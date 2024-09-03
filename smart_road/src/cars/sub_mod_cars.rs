@@ -36,22 +36,41 @@ impl <'a>Cars<'a> {
         self.max_velocity = 0.0;
         self.min_velocity = 0.0;
     }
-    
 
     pub fn handle_collisions(&mut self) {
         let collisions = detect_collisions(&mut self.cars); // Appelle la méthode pour détecter les collisions
-        // Vous pouvez maintenant traiter les collisions détectées ici
         let mut slow_down_cars = std::collections::HashSet::new();
-        for (i, j) in collisions {
-            slow_down_cars.insert(i);
-            slow_down_cars.insert(j);
+        let mut stop_cars = std::collections::HashSet::new();
+    
+        for (i, j, zone) in collisions {
+            match zone {
+                "middle" => {
+                    slow_down_cars.insert(i);
+                    slow_down_cars.insert(j);
+                }
+                "low" => {
+                    stop_cars.insert(i);
+                    stop_cars.insert(j);
+                }
+                _ => {}
+            }
         }
+    
+        // Réaction aux collisions dans la zone middle (ralentir)
         for car_index in slow_down_cars {
             if let Some(car) = self.cars.get_mut(car_index) {
-                car.level_speed = 0;
+                car.level_speed = 3; // Ralentir la voiture
+            }
+        }
+    
+        // Réaction aux collisions dans la zone low (arrêter)
+        for car_index in stop_cars {
+            if let Some(car) = self.cars.get_mut(car_index) {
+                car.level_speed = 1; // Arrêter la voiture
             }
         }
     }
+    
 
     pub fn update_cars(&mut self) {
         for car in self.cars.iter_mut() {
@@ -126,7 +145,7 @@ impl <'a>Cars<'a> {
 }
 
 
-fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
+pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize, &'static str)> {
     let mut collisions = Vec::new();
     
     for i in 0..cars.len() {
@@ -134,34 +153,60 @@ fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize)> {
             let car_a = &cars[i];
             let car_b = &cars[j];
             
-            // Définir les rectangles de collision
-            let rect_a = (
-                car_a.column,
-                car_a.row,
-                car_a.size,
-                car_a.size,
-            );
-            let rect_b = (
-                car_b.column,
-                car_b.row,
-                car_b.size,
-                car_b.size,
-            );
+            // Obtenez les deux paires de rectangles de collision
+            let (rect_a_middle, rect_a_low) = expand_collision_rect(car_a);
+            let (rect_b_middle, rect_b_low) = expand_collision_rect(car_b);
             
-            // Vérifier le chevauchement des rectangles
-            if rect_a.0 < rect_b.0 + (rect_b.2 as i32)
-                && rect_a.0 + (rect_a.2 as i32) > rect_b.0
-                && rect_a.1 < rect_b.1 + (rect_b.3 as i32)
-                && rect_a.1 + (rect_a.3 as i32) > rect_b.1
-            {
-                collisions.push((i, j));
+            // Vérifiez les chevauchements pour la zone middle
+            if rectangles_overlap(rect_a_middle, rect_b_middle) {
+                collisions.push((i, j, "middle"));
+            }
+            // Vérifiez les chevauchements pour la zone low
+            else if rectangles_overlap(rect_a_low, rect_b_low) {
+                collisions.push((i, j, "low"));
             }
         }
     }
-    
+    if collisions.len()>0{
+        println!("collisions: {:?}", collisions);
+    }
     collisions
 }
 
 fn round_to_three_decimal_places(value: f64) -> f64 {
     (value * 1000.0).round() / 1000.0
+}
+
+fn expand_collision_rect(car: &Car) -> ((i32, i32, i32, i32), (i32, i32, i32, i32)) {
+    let radians = car.destination.to_radians();
+    let dmx = (radians.cos() * car.collision_extension_midlle as f32) as i32;
+    let dmy = (radians.sin() * car.collision_extension_midlle as f32) as i32;
+    let dlx = (radians.cos() * car.collision_extension_low as f32) as i32;
+    let dly = (radians.sin() * car.collision_extension_low as f32) as i32;
+
+    // Calculer l'extension de collision en fonction de la direction
+    let extension_midlle_x = dmx;
+    let extension_midlle_y = dmy;
+    let extension_low_x = dlx;
+    let extension_low_y = dly;
+    
+    ((
+        car.column - (car.size as i32 * 2) + extension_midlle_x,
+        car.row - (car.size as i32 * 2) + extension_midlle_y,
+        car.size as i32 + car.collision_extension_midlle as i32,
+        car.size as i32 + car.collision_extension_midlle as i32,
+    ),
+    (
+        car.column - (car.size as i32 * 2) - extension_low_x,
+        car.row - (car.size as i32 * 2) - extension_low_y,
+        car.size as i32 + car.collision_extension_low as i32,
+        car.size as i32 + car.collision_extension_low as i32,
+    ))
+}
+
+fn rectangles_overlap(rect1: (i32, i32, i32, i32), rect2: (i32, i32, i32, i32)) -> bool {
+    rect1.0 < rect2.0 + rect2.2
+        && rect1.0 + rect1.2 > rect2.0
+        && rect1.1 < rect2.1 + rect2.3
+        && rect1.1 + rect1.3 > rect2.1
 }

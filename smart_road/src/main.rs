@@ -82,41 +82,4 @@ fn main() {
                                 smart_road::utils::random_cars(
                                     random_spawn(),
                                     &texture_creator,
-                                    SQUARE_SPEED,
-                                    cell_size,
-                                    &mut cars,
-                                );
-                            }
-                            _ => {}
-                        }
-                        // println!("One second has passed. Performing periodic action.");
-
-                        // Update the last action time
-                        last_action_time = Instant::now();
-                    }
-                }
-                _ => {}
-            }
-        }
-
-        let collisions = detect_collisions(&mut cars);
-        handle_collisions(&mut cars, collisions);
-        update_cars(&mut cars);
-
-        cars.retain(|car| {
-            car.column >= 0 && car.column <= WIDTH && car.row >= 0 && car.row <= HEIGHT
-        });
-
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
-        canvas.clear();
-        matrix_and_canva(&mut canvas, HEIGHT, WIDTH);
-
-        canvas.set_draw_color(Color::RGB(255, 0, 0));
-        for car in &cars {
-            car.draw(&mut canvas);
-        }
-
-        canvas.present();
-        std::thread::sleep(Duration::from_millis(16));
-    }
-}
+                    

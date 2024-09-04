@@ -97,8 +97,6 @@ impl<'a> Car<'a> {
             Destinations::West => west_destination(row, column, size),
         };
         
-        println!("path: {}", path.len());
-        let sizy = (size as f64 * 0.9) as u32;
         Car {
             row,
             column,
@@ -107,7 +105,7 @@ impl<'a> Car<'a> {
             path,
             level_speed: 1,
             speed,
-            size: sizy,
+            size,
             choc: 0,
             destination,
             index_path: 0,
@@ -127,8 +125,13 @@ impl<'a> Car<'a> {
                     self.destination = Destinations::South;
 
                     if self.row >= next_position.0{
-                        self.position = (self.row, self.column);
+                        self.position = *next_position;
+                        self.row = self.position.0;
+                        self.column = self.position.1;
                         self.index_path += 1;
+                        if let Some(destination) = where_we_go(self) {
+                            self.destination = destination;
+                        }
                     }
 
                 } else {
@@ -136,20 +139,28 @@ impl<'a> Car<'a> {
                     self.destination = Destinations::North;
 
                     if self.row <= next_position.0{
-                        self.position = (self.row, self.column);
+                        self.position = *next_position;
+                        self.row = self.position.0;
+                        self.column = self.position.1;
                         self.index_path += 1;
+                        if let Some(destination) = where_we_go(self) {
+                            self.destination = destination;
+                        }
                     }
                 }
-            }
-
-            if next_position.1 != self.column {
+            }else{
                 if next_position.1 > self.column {
                     self.column += (self.speed as i32) * self.level_speed;
                     self.destination = Destinations::East;
 
                     if self.column >= next_position.1{
-                        self.position = (self.row, self.column);
+                        self.position = *next_position;
+                        self.row = self.position.0;
+                        self.column = self.position.1;
                         self.index_path += 1;
+                        if let Some(destination) = where_we_go(self) {
+                            self.destination = destination;
+                        }
 
                     }
                 } else {
@@ -157,11 +168,22 @@ impl<'a> Car<'a> {
                     self.destination = Destinations::West;
 
                     if self.column <= next_position.1{
-                        self.position = (self.row, self.column);
+                        self.position = *next_position;
+                        self.row = self.position.0;
+                        self.column = self.position.1;
                         self.index_path += 1;
+                        if let Some(destination) = where_we_go(&self) {
+                            self.destination = destination;
+                        }
                     }
                 }
             }
+        }else{
+            println!("Erreur position!!!!!!!!");
+            println!("ici: {}", self.level_speed);
+            println!("index: {}", self.index_path);
+            println!("positions: {:?}", self.position);
+            println!("path: {:?}", self.path);
         }
     }
     
@@ -211,3 +233,24 @@ fn east_spawn(destination: &Destinations) -> (i32, i32) {
     }
     (10, COLUMN)
 }
+
+fn where_we_go(car: &Car) -> Option<Destinations> {
+    if let Some(next_position) = car.path.get(car.index_path as usize + 1) {
+        if next_position.0 != car.row {
+            if car.row > next_position.0 {
+                return Some(Destinations::North);
+            } else {
+                return Some(Destinations::South);
+            }
+        } else {
+            if car.column > next_position.1 {
+                return Some(Destinations::West);
+            } else {
+                return Some(Destinations::East);
+            }
+        }
+    }
+    
+    None // Retourne None si la prochaine position n'existe pas
+}
+

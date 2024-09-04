@@ -4,7 +4,7 @@ use sdl2::video::WindowContext;
 use smart_road::cars::{sub_mod_cars::Cars, Destinations};
 use smart_road::utils::{random_cars, random_spawn};
 
-const ACTION_INTERVAL: std::time::Duration = std::time::Duration::from_millis(500);
+const ACTION_INTERVAL: std::time::Duration = std::time::Duration::from_millis(800);
 const SQUARE_SPEED: i32 = 1;
 
 // Ajout de la contrainte de durée de vie

@@ -50,7 +50,9 @@ fn main() {
         }
 
         cars.handle_collisions();
+        cars.count_collisions();
         cars.update_cars();
+        println!(" Collision: {}", cars.collisions);
         cars.retain(HEIGHT, WIDTH);
 
         canvas.set_draw_color(Color::RGB(0, 0, 0));

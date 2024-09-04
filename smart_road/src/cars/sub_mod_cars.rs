@@ -45,14 +45,14 @@ impl<'a> Cars<'a> {
         for (car_index, car) in self.cars.iter().enumerate() {
             let mut level_speed = 3; // Vitesse par défaut
 
-            for (other_car_index, other_car) in self.cars.iter().enumerate() {
-                if collisions_prevent_with_directions(car, other_car)
-                    || car_need_to_stop_now(car, other_car, car_index, other_car_index)
-                {
-                    level_speed = 0;
-                    break;
-                }
-            }
+            // for (other_car_index, other_car) in self.cars.iter().enumerate() {
+            //     if collisions_prevent_with_directions(car, other_car)
+            //         || car_need_to_stop_now(car, other_car, car_index, other_car_index)
+            //     {
+            //         level_speed = 0;
+            //         break;
+            //     }
+            // }
 
             speeds.push(level_speed); // Enregistre la vitesse calculée pour cette voiture
         }
@@ -142,63 +142,79 @@ impl<'a> Cars<'a> {
                 }
             }
         }
+        println!(" Collision: {}", self.collisions);
     }
 
     fn are_colliding(&self, car_a: &Car, car_b: &Car) -> bool {
-        // Ici, vous pouvez implémenter la logique pour vérifier si les voitures se chevauchent ou entrent en collision
-        // Utilisez des fonctions comme `rectangles_overlap` si vous avez des rectangles de collision, ou d'autres critères.
 
-        let (rect_a_middle, rect_a_low) = self.expand_collision_rect(car_a);
-        let (rect_b_middle, rect_b_low) = self.expand_collision_rect(car_b);
+        // let (rect_a_middle, rect_a_low) = self.expand_collision_rect(car_a);
+        // let (rect_b_middle, rect_b_low) = self.expand_collision_rect(car_b);
 
         // Vérifiez les chevauchements pour la zone middle
-        if self.rectangles_overlap(rect_a_middle, rect_b_middle) {
+        if self.rectangles_overlap(car_a, car_b) {
             return true;
         }
-        // Vérifiez les chevauchements pour la zone low
-        if self.rectangles_overlap(rect_a_low, rect_b_low) {
-            return true;
-        }
+        // // Vérifiez les chevauchements pour la zone low
+        // else if self.rectangles_overlap(rect_a_low, rect_b_low) {
+        //     return true;
+        // }
 
         false
     }
 
-    fn expand_collision_rect(&self, car: &Car) -> ((i32, i32, i32, i32), (i32, i32, i32, i32)) {
-        let radians = car.destination.to_radians();
-        let dmx = (radians.cos() * car.collision_extension_midlle as f32) as i32;
-        let dmy = (radians.sin() * car.collision_extension_midlle as f32) as i32;
-        let dlx = (radians.cos() * car.collision_extension_low as f32) as i32;
-        let dly = (radians.sin() * car.collision_extension_low as f32) as i32;
+    // fn expand_collision_rect(&self, car: &Car) -> ((i32, i32, i32, i32), (i32, i32, i32, i32)) {
+    //     let radians = car.destination.to_radians();
+    //     let dmx = (radians.cos() * car.collision_extension_midlle as f32) as i32;
+    //     let dmy = (radians.sin() * car.collision_extension_midlle as f32) as i32;
+    //     let dlx = (radians.cos() * car.collision_extension_low as f32) as i32;
+    //     let dly = (radians.sin() * car.collision_extension_low as f32) as i32;
 
-        // Calculer l'extension de collision en fonction de la direction
-        let extension_midlle_x = dmx;
-        let extension_midlle_y = dmy;
-        let extension_low_x = dlx;
-        let extension_low_y = dly;
+    //     // Calculer l'extension de collision en fonction de la direction
+    //     let extension_midlle_x = dmx;
+    //     let extension_midlle_y = dmy;
+    //     let extension_low_x = dlx;
+    //     let extension_low_y = dly;
 
-        (
-            (
-                car.column - (car.size as i32 * 2) + extension_midlle_x,
-                car.row - (car.size as i32 * 2) + extension_midlle_y,
-                car.size as i32 + car.collision_extension_midlle as i32,
-                car.size as i32 + car.collision_extension_midlle as i32,
-            ),
-            (
-                car.column - (car.size as i32 * 2) - extension_low_x,
-                car.row - (car.size as i32 * 2) - extension_low_y,
-                car.size as i32 + car.collision_extension_low as i32,
-                car.size as i32 + car.collision_extension_low as i32,
-            ),
-        )
+    //     (
+    //         (
+    //             car.column - (car.size as i32 * 2) + extension_midlle_x,
+    //             car.row - (car.size as i32 * 2) + extension_midlle_y,
+    //             car.size as i32 + car.collision_extension_midlle as i32,
+    //             car.size as i32 + car.collision_extension_midlle as i32,
+    //         ),
+    //         (
+    //             car.column - (car.size as i32 * 2) - extension_low_x,
+    //             car.row - (car.size as i32 * 2) - extension_low_y,
+    //             car.size as i32 + car.collision_extension_low as i32,
+    //             car.size as i32 + car.collision_extension_low as i32,
+    //         ),
+    //     )
+    // }
+
+    fn rectangles_overlap(&self, car_a: &Car, car_b: &Car) -> bool {
+        // Calcul des positions et tailles des rectangles de collision pour car_a et car_b
+        let car_a_left = car_a.column;
+        let car_a_right = car_a.column + car_a.size as i32;
+        let car_a_top = car_a.row;
+        let car_a_bottom = car_a.row + car_a.size as i32;
+    
+        let car_b_left = car_b.column;
+        let car_b_right = car_b.column + car_b.size as i32;
+        let car_b_top = car_b.row;
+        let car_b_bottom = car_b.row + car_b.size as i32;
+    
+        // Vérifiez les chevauchements pour les rectangles de car_a et car_b
+        if car_a_left < car_b_right
+            && car_a_right > car_b_left
+            && car_a_top < car_b_bottom
+            && car_a_bottom > car_b_top
+        {
+            return true;
+        }
+    
+        false
     }
-
-    fn rectangles_overlap(&self, rect1: (i32, i32, i32, i32), rect2: (i32, i32, i32, i32)) -> bool {
-        rect1.0 < rect2.0 + rect2.2
-            && rect1.0 + rect1.2 > rect2.0
-            && rect1.1 < rect2.1 + rect2.3
-            && rect1.1 + rect1.3 > rect2.1
-    }
-}
+}    
 
 //Renvoie true si la prochaine case est occupé;
 fn next_position_occupied(car: &Car, other_car: &Car) -> bool {

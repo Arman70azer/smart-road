@@ -50,6 +50,7 @@ pub struct Car<'a> {
     pub collision_extension_midlle: i32,
     pub collision_extension_low: i32,
 }
+
 impl<'a> fmt::Debug for Car<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Car")
@@ -63,6 +64,7 @@ impl<'a> fmt::Debug for Car<'a> {
             .finish()
     }
 }
+
 impl<'a> Car<'a> {
     pub fn new(
         spawn: Destinations,
@@ -169,6 +171,7 @@ impl<'a> Car<'a> {
             .apply_texture_with_rotation(canvas, self.column, self.row, self.size, rotation)
     }
 }
+
 fn north_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::West {
         return (0, 8);
@@ -178,6 +181,7 @@ fn north_spawn(destination: &Destinations) -> (i32, i32) {
     }
     (0, 10)
 }
+
 fn south_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::West {
         return (ROW, 11);
@@ -187,6 +191,7 @@ fn south_spawn(destination: &Destinations) -> (i32, i32) {
     }
     (ROW, 13)
 }
+
 fn west_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::North {
         return (11, 0);
@@ -196,6 +201,7 @@ fn west_spawn(destination: &Destinations) -> (i32, i32) {
     }
     (13, 0)
 }
+
 fn east_spawn(destination: &Destinations) -> (i32, i32) {
     if *destination == Destinations::North {
         return (8, COLUMN);

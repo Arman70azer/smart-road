@@ -1,10 +1,6 @@
-// use sdl2::image::LoadTexture;
-// use sdl2::pixels::Color;
-// use sdl2::rect::Rect;
 use crate::cars::{Car, Destinations};
-use sdl2::render::{TextureCreator};
+use sdl2::render::TextureCreator;
 use rand::{prelude::SliceRandom, Rng};
-
 
 
 // pub fn applicate_texture(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, texture_creator: &sdl2::render::TextureCreator<sdl2::video::WindowContext>, filename: String, heigth: u32, width: u32) {
@@ -70,6 +66,7 @@ fn random_destinations(spawn: Destinations) -> Destinations {
 pub fn random_spawn() -> Destinations {
     let mut rng = rand::thread_rng(); 
     let num_random = rng.gen_range(0..4); 
+
     match num_random {
        0 => Destinations::East,
        1 => Destinations::West,

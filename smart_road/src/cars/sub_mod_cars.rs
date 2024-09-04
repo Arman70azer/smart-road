@@ -43,7 +43,7 @@ impl <'a>Cars<'a> {
         let mut speeds = Vec::new();
     
         for car in &self.cars {
-            let mut level_speed = 3; // Vitesse par défaut
+            let mut level_speed = 6; // Vitesse par défaut
 
         
             for other_car in &self.cars {

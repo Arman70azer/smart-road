@@ -45,53 +45,10 @@ impl <'a>Cars<'a> {
         for (car_index, car) in self.cars.iter().enumerate() {
             let mut level_speed = 3; // Vitesse par défaut
 
-        
             for (other_car_index, other_car) in self.cars.iter().enumerate() {
-
-                let position_occupied = if let Some(next_pos) = car.path.get(car.index_path + 1) {
-                    *next_pos == other_car.position
-                } else {
-                    false
-                };
-                
-                let position_conflict = if let (Some(car_next_pos), Some(other_car_next_pos)) = (
-                    car.path.get(car.index_path + 1),
-                    other_car.path.get(other_car.index_path + 1),
-                ) {
-                    *car_next_pos == *other_car_next_pos
-                } else {
-                    false
-                };
             
-                
-                // Vérifie les collisions potentielles pour les directions Est et Ouest
-                if (car.destination == Destinations::East && other_car.column > car.column)
-                    || (car.destination == Destinations::West && other_car.column < car.column)
-                {
-                    let row_diff = (other_car.row as i32).abs_diff(car.row as i32);
-                    let column_diff = (other_car.column as i32 - car.column as i32).abs();
-                    
-                    if row_diff <= car.size && column_diff <= car.collision_extension_midlle{
-                        level_speed = 0; // Arrêt complet si trop proche
-                        break;
-                    }
-                }
-        
-                // Vérifie les collisions potentielles pour les directions Nord et Sud
-                if (car.destination == Destinations::North && other_car.row < car.row)
-                    || (car.destination == Destinations::South && other_car.row > car.row)
-                {
-                    let column_diff = (other_car.column as i32).abs_diff(car.column as i32);
-                    let row_diff = (other_car.row as i32 - car.row as i32).abs();
-                    
-                    if column_diff <= car.size && row_diff <= car.collision_extension_midlle {
-                        level_speed = 0; // Arrêt complet si trop proche
-                        break;
-                    }
-                }
-
-                if (position_occupied || position_conflict  ) && car_index<other_car_index && other_car.level_speed != 0{
-                    level_speed = 0; // Arrêt complet si trop proche
+                if collisions_prevent_with_directions(car, other_car)|| car_need_to_stop_now(car, other_car, car_index, other_car_index){
+                    level_speed = 0;
                     break;
                 }
             }
@@ -179,6 +136,67 @@ impl <'a>Cars<'a> {
     }
 
 }
+
+//Renvoie true si la prochaine case est occupé;
+fn next_position_occupied(car: &Car, other_car: &Car) -> bool {
+    if let Some(next_pos) = car.path.get(car.index_path + 1) {
+        return *next_pos == other_car.position;
+    }
+    false
+
+}
+
+//Renvoie true si la prochaine case est aussi désiré par une autre voiture
+fn position_can_be_conflictual(car: &Car, other_car: &Car) -> bool {
+    if let (Some(car_next_pos), Some(other_car_next_pos)) = (
+        car.path.get(car.index_path + 1),
+        other_car.path.get(other_car.index_path + 1),
+    ) {
+        return *car_next_pos == *other_car_next_pos;
+    }
+    false
+}
+
+//Méthod by Fred
+fn collisions_prevent_with_directions(car: &Car, other_car: &Car)-> bool{
+    // Vérifie les collisions potentielles pour les directions Est et Ouest
+    if (car.destination == Destinations::East && other_car.column > car.column)
+    || (car.destination == Destinations::West && other_car.column < car.column){
+
+        let row_diff = (other_car.row as i32).abs_diff(car.row as i32);
+        let column_diff = (other_car.column as i32 - car.column as i32).abs();
+        
+        if row_diff <= car.size && column_diff <= car.collision_extension_midlle{
+            return true;
+        }
+    }
+
+    // Vérifie les collisions potentielles pour les directions Nord et Sud
+    if (car.destination == Destinations::North && other_car.row < car.row)
+        || (car.destination == Destinations::South && other_car.row > car.row){
+
+        let column_diff = (other_car.column as i32).abs_diff(car.column as i32);
+        let row_diff = (other_car.row as i32 - car.row as i32).abs();
+        
+        if column_diff <= car.size && row_diff <= car.collision_extension_midlle {
+            return true;
+        }
+    }
+
+    false
+}
+
+fn car_need_to_stop_now(car: &Car, other_car: &Car, car_index: usize, other_car_index:usize)-> bool{
+    let position_occupied = next_position_occupied(car, other_car);
+                
+    let position_conflict = position_can_be_conflictual(car, other_car);
+
+    if (position_occupied || position_conflict  ) && car_index<other_car_index && other_car.level_speed != 0{
+        return true;
+    }
+    false
+}
+
 
 
 // pub fn detect_collisions(cars: &mut [Car]) -> Vec<(usize, usize, &'static str)> {

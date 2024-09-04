@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 use smart_road::matrix::{matrix_and_canva, ROW, COLUMN};
-use smart_road::cars::{sub_mod_cars::Cars};
+use smart_road::cars::sub_mod_cars::Cars;
 use smart_road::statistics::{init_font, display_stats};
 use sdl2::image::InitFlag;
 use sdl2::pixels::Color;

@@ -52,6 +52,8 @@ impl <'a>Cars<'a> {
                     break;
                 }
             }
+
+            //let zone = car.row > 7*car.size && car.row < 15*car.size
         
             speeds.push(level_speed); // Enregistre la vitesse calculée pour cette voiture
         }

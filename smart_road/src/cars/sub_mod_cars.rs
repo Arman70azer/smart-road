@@ -1,5 +1,5 @@
 use crate::cars::Car;
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
 
 use super::Destinations;
 
@@ -42,11 +42,28 @@ impl <'a>Cars<'a> {
     pub fn handle_collisions(&mut self) {
         let mut speeds = Vec::new();
     
-        for car in &self.cars {
+        for (car_index, car) in self.cars.iter().enumerate() {
             let mut level_speed = 3; // Vitesse par défaut
 
         
-            for other_car in &self.cars {
+            for (other_car_index, other_car) in self.cars.iter().enumerate() {
+
+                let position_occupied = if let Some(next_pos) = car.path.get(car.index_path + 1) {
+                    *next_pos == other_car.position
+                } else {
+                    false
+                };
+                
+                let position_conflict = if let (Some(car_next_pos), Some(other_car_next_pos)) = (
+                    car.path.get(car.index_path + 1),
+                    other_car.path.get(other_car.index_path + 1),
+                ) {
+                    *car_next_pos == *other_car_next_pos
+                } else {
+                    false
+                };
+            
+                
                 // Vérifie les collisions potentielles pour les directions Est et Ouest
                 if (car.destination == Destinations::East && other_car.column > car.column)
                     || (car.destination == Destinations::West && other_car.column < car.column)
@@ -54,8 +71,7 @@ impl <'a>Cars<'a> {
                     let row_diff = (other_car.row as i32).abs_diff(car.row as i32);
                     let column_diff = (other_car.column as i32 - car.column as i32).abs();
                     
-                    //TODO Changer la condition other_car.level_speed
-                    if row_diff <= car.size && column_diff <= car.collision_extension_midlle && car.index_path> other_car.index_path{
+                    if row_diff <= car.size && column_diff <= car.collision_extension_midlle{
                         level_speed = 0; // Arrêt complet si trop proche
                         break;
                     }
@@ -68,10 +84,15 @@ impl <'a>Cars<'a> {
                     let column_diff = (other_car.column as i32).abs_diff(car.column as i32);
                     let row_diff = (other_car.row as i32 - car.row as i32).abs();
                     
-                    if column_diff <= car.size && row_diff <= car.collision_extension_midlle && car.index_path> other_car.index_path  {
+                    if column_diff <= car.size && row_diff <= car.collision_extension_midlle {
                         level_speed = 0; // Arrêt complet si trop proche
                         break;
                     }
+                }
+
+                if (position_occupied || position_conflict  ) && car_index<other_car_index && other_car.level_speed != 0{
+                    level_speed = 0; // Arrêt complet si trop proche
+                    break;
                 }
             }
         

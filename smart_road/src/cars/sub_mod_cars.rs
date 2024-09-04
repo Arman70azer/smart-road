@@ -142,7 +142,6 @@ impl<'a> Cars<'a> {
                 }
             }
         }
-        println!(" Collision: {}", self.collisions);
     }
 
     fn are_colliding(&self, car_a: &Car, car_b: &Car) -> bool {

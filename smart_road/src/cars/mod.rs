@@ -9,7 +9,6 @@ use sub_mod_path::{east_destination, west_destination, north_destinations, south
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
 use std::{fmt, time::{Instant,Duration}};
-mod njeanfre;
 #[derive(PartialEq, Clone, Copy)]
 pub enum Destinations {
     North,

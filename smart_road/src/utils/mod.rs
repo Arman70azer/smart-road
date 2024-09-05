@@ -32,7 +32,7 @@ pub fn random_cars<'a>(
     cars.push(new_car);
 }
 
-fn random_destinations(spawn: Destinations) -> Destinations {
+pub fn random_destinations(spawn: Destinations) -> Destinations {
     let mut rng = rand::thread_rng(); // Création d'un générateur de nombres aléatoires
 
     match spawn {

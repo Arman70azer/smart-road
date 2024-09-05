@@ -24,7 +24,7 @@ pub fn display_stats(
         format!("Max Time: {:?}", cars.max_time),
         format!("Min Time: {:?}", cars.min_time),
         format!("Collisions: {}", cars.collisions),
-        format!("Close Calls: {}", 3),
+        format!("Close Calls: {}", cars.close_calls),
     ];
 
     let line_height = 50; 

@@ -56,6 +56,9 @@ pub fn display_stats(
         // Copier le texte sur le canevas
         canvas.copy(&text_texture, None, Some(Rect::new(x, y_position, surface_width, line_height as u32)))
             .expect("Failed to copy texture to canvas");
+        if let Err(e) = texture_creator.create_texture_from_surface(&text_surface) {
+            println!("Error creating texture: {:?}", e);
+        }
     }
 
     canvas.present();

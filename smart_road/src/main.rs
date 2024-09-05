@@ -21,6 +21,7 @@ fn main() {
     let window = video_subsystem
         .window("SDL2 Window", WIDTH as u32, HEIGHT as u32)
         .position_centered()
+        .opengl()
         .build()
         .unwrap();
     let mut canvas = window.into_canvas().build().unwrap();
@@ -65,6 +66,7 @@ fn main() {
 
         if see_tab && cars.cars.is_empty() {
             display_stats(&mut canvas, &font, &texture_creator, &cars);
+            // video_subsystem.gl_set_swap_interval(0).unwrap();
         }
 
         canvas.present();

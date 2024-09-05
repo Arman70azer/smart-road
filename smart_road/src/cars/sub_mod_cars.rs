@@ -45,14 +45,14 @@ impl<'a> Cars<'a> {
         for (car_index, car) in self.cars.iter().enumerate() {
             let mut level_speed = 3; // Vitesse par défaut
 
-            // for (other_car_index, other_car) in self.cars.iter().enumerate() {
-            //     if collisions_prevent_with_directions(car, other_car)
-            //         || car_need_to_stop_now(car, other_car, car_index, other_car_index)
-            //     {
-            //         level_speed = 0;
-            //         break;
-            //     }
-            // }
+            for (other_car_index, other_car) in self.cars.iter().enumerate() {
+                if collisions_prevent_with_directions(car, other_car)
+                    || car_need_to_stop_now(car, other_car, car_index, other_car_index)
+                {
+                    level_speed = 0;
+                    break;
+                }
+            }
 
             speeds.push(level_speed); // Enregistre la vitesse calculée pour cette voiture
         }

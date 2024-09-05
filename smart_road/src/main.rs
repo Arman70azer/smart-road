@@ -51,7 +51,6 @@ fn main() {
         }
 
         cars.handle_collisions();
-        cars.count_collisions();
         cars.update_cars();
         cars.retain(HEIGHT, WIDTH);
 

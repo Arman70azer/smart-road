@@ -4,6 +4,7 @@ use crate::matrix::{
 };
 mod sub_mod_path;
 pub mod sub_mod_cars;
+use rand::Rng;
 use sub_mod_path::{east_destination, west_destination, north_destinations, south_destinations};
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::video::{Window, WindowContext};
@@ -49,6 +50,7 @@ pub struct Car<'a> {
     pub timer: Duration,
     pub collision_extension_midlle: i32,
     pub collision_extension_low: i32,
+    pub name: i32,
 }
 
 impl<'a> fmt::Debug for Car<'a> {
@@ -96,7 +98,8 @@ impl<'a> Car<'a> {
             Destinations::East => east_destination(row, column, size),
             Destinations::West => west_destination(row, column, size),
         };
-        
+
+        let mut rng = rand::thread_rng();
         Car {
             row,
             column,
@@ -113,6 +116,7 @@ impl<'a> Car<'a> {
             timer: Duration::new(0, 0),
             collision_extension_midlle: 50,
             collision_extension_low: 10,
+            name: rng.gen_range(1_000_000..10_000_000),
         }
     }
     

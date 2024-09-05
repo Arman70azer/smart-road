@@ -12,6 +12,8 @@ pub struct Cars<'a> {
     pub close_calls: i16,
     pub min_velocity: f64,
     pub max_velocity: f64,
+    pub cars_who_have_collisions: Vec<(i32, i32)>,
+    pub close_call_cars: Vec<(i32, i32)>,
 }
 
 impl<'a> Cars<'a> {
@@ -25,18 +27,13 @@ impl<'a> Cars<'a> {
             min_time: Duration::new(100, 0),
             min_velocity: 0.0,
             max_velocity: 0.0,
+            cars_who_have_collisions: Vec::new(),
+            close_call_cars: Vec::new(),
         }
     }
 
     pub fn refresh(&mut self) {
-        self.cars.clear();
-        self.cars_passed = 0;
-        self.close_calls = 0;
-        self.collisions = 0;
-        self.max_time = Duration::new(0, 0);
-        self.min_time = Duration::new(100, 0);
-        self.max_velocity = 0.0;
-        self.min_velocity = 0.0;
+        *self = Cars::new()
     }
 
     pub fn handle_collisions(&mut self) {
@@ -56,6 +53,18 @@ impl<'a> Cars<'a> {
             }
 
             for (other_car_index, other_car) in self.cars.iter().enumerate() {
+                if collision_with_other_car(car, other_car) && !self.cars_who_have_collisions.contains(&(other_car.name, car.name))
+                && !self.cars_who_have_collisions.contains(&(car.name, other_car.name)){
+                    self.cars_who_have_collisions.push((car.name, other_car.name));
+                    self.collisions+=1;
+                }
+
+                if close_call_detect(car, other_car) && !self.cars_who_have_collisions.contains(&(car.name, other_car.name)) && 
+                !self.close_call_cars.contains(&(car.name, other_car.name)){
+                    self.close_call_cars.push((car.name, other_car.name));
+                    self.close_call_cars.push((other_car.name, car.name));
+                    self.close_calls+=1;
+                }
                 if collisions_prevent_with_directions(car, other_car)
                     || car_need_to_stop_now(car, other_car, car_index, other_car_index)
                 {
@@ -196,6 +205,45 @@ fn collisions_prevent_with_directions(car: &Car, other_car: &Car) -> bool {
 
     false
 }
+
+fn collision_with_other_car(car: &Car, other_car: &Car) -> bool {
+    // Calcul de la différence de lignes (row) et de colonnes (column)
+
+    let row_diff = (other_car.row).abs_diff(car.row);
+    let column_diff = (other_car.column).abs_diff(car.column);
+
+    // Vérifie si les différences de ligne et de colonne sont inférieures à la taille de la voiture
+    row_diff < car.size && column_diff < car.size && row_diff != 0 && column_diff != 0
+    
+}
+
+fn close_call_detect(car: &Car, other_car: &Car)->bool{
+    if (car.destination == Destinations::East && other_car.column > car.column)
+        || (car.destination == Destinations::West && other_car.column < car.column)
+    {
+        let row_diff = (other_car.row as i32).abs_diff(car.row as i32);
+        let column_diff = (other_car.column as i32 - car.column as i32).abs();
+
+        if row_diff < car.size && column_diff < car.collision_extension_low {
+            return true;
+        }
+    }
+
+    // Vérifie les collisions potentielles pour les directions Nord et Sud
+    if (car.destination == Destinations::North && other_car.row < car.row)
+        || (car.destination == Destinations::South && other_car.row > car.row)
+    {
+        let column_diff = (other_car.column as i32).abs_diff(car.column as i32);
+        let row_diff = (other_car.row as i32 - car.row as i32).abs();
+
+        if column_diff < car.size && row_diff < car.collision_extension_low {
+
+            return true;
+        }
+    }
+    false
+}
+
 
 fn collision_extension(car: &Car, other_car: &Car) -> bool {
     for i in 2..=3 {
